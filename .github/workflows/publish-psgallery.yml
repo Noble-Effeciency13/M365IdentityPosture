@@ -1,0 +1,113 @@
+name: Publish to PowerShell Gallery
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Install required modules for testing
+      shell: pwsh
+      run: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        
+        # Install the required modules for smoke testing
+        # Using specific versions to avoid compatibility issues
+        Install-Module -Name Microsoft.Graph.Authentication -RequiredVersion 2.24.0 -Force -AllowClobber
+        Install-Module -Name Microsoft.Graph.Groups -RequiredVersion 2.24.0 -Force -AllowClobber
+        Install-Module -Name ExchangeOnlineManagement -RequiredVersion 3.4.0 -Force -AllowClobber
+        Install-Module -Name Microsoft.Online.SharePoint.PowerShell -RequiredVersion 16.0.24009.12000 -Force -AllowClobber
+        Install-Module -Name Az.Accounts -RequiredVersion 3.0.5 -Force -AllowClobber
+        Install-Module -Name Az.Resources -RequiredVersion 7.5.0 -Force -AllowClobber
+    
+    - name: Test module manifest
+      shell: pwsh
+      run: |
+        Write-Host "Testing module manifest..." -ForegroundColor Cyan
+        $manifest = Test-ModuleManifest -Path ./M365IdentityPosture.psd1 -ErrorAction Stop
+        Write-Host "Module Name: $($manifest.Name)" -ForegroundColor Green
+        Write-Host "Module Version: $($manifest.Version)" -ForegroundColor Green
+        Write-Host "PowerShell Version: $($manifest.PowerShellVersion)" -ForegroundColor Green
+    
+    - name: Run smoke tests
+      shell: pwsh
+      run: |
+        if (Test-Path ./Tests/SmokeTest.ps1) {
+          Write-Host "Running smoke tests..." -ForegroundColor Cyan
+          & ./Tests/SmokeTest.ps1
+        } else {
+          Write-Host "No smoke tests found, skipping..." -ForegroundColor Yellow
+        }
+    
+    - name: Validate module structure
+      shell: pwsh
+      run: |
+        Write-Host "Validating module structure..." -ForegroundColor Cyan
+        
+        # Check for required files
+        $requiredFiles = @(
+          'M365IdentityPosture.psd1',
+          'M365IdentityPosture.psm1',
+          'README.md',
+          'LICENSE',
+          'CHANGELOG.md'
+        )
+        
+        foreach ($file in $requiredFiles) {
+          if (-not (Test-Path $file)) {
+            throw "Required file missing: $file"
+          }
+          Write-Host "✓ Found: $file" -ForegroundColor Green
+        }
+        
+        # Check for Public folder with at least one function
+        if (-not (Test-Path './Public/*.ps1')) {
+          throw "No public functions found in ./Public/"
+        }
+        Write-Host "✓ Public functions found" -ForegroundColor Green
+    
+    - name: Update module version (if needed)
+      shell: pwsh
+      run: |
+        # This step can auto-increment version if you want
+        # For now, we'll just display the current version
+        $manifest = Import-PowerShellDataFile -Path ./M365IdentityPosture.psd1
+        Write-Host "Publishing version: $($manifest.ModuleVersion)" -ForegroundColor Cyan
+    
+    - name: Publish to PSGallery
+      shell: pwsh
+      env:
+        NUGET_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+      run: |
+        Write-Host "Publishing to PowerShell Gallery..." -ForegroundColor Cyan
+        try {
+          Publish-Module -Path . -NuGetApiKey $env:NUGET_API_KEY -Verbose
+          Write-Host "✓ Successfully published to PowerShell Gallery!" -ForegroundColor Green
+        }
+        catch {
+          Write-Error "Failed to publish: $_"
+          throw
+        }
+    
+    - name: Verify publication
+      shell: pwsh
+      run: |
+        Write-Host "Waiting for module to appear in PSGallery..." -ForegroundColor Cyan
+        Start-Sleep -Seconds 30
+        
+        $module = Find-Module -Name M365IdentityPosture -ErrorAction SilentlyContinue
+        if ($module) {
+          Write-Host "✓ Module successfully published!" -ForegroundColor Green
+          Write-Host "  Name: $($module.Name)" -ForegroundColor Gray
+          Write-Host "  Version: $($module.Version)" -ForegroundColor Gray
+          Write-Host "  Published: $($module.PublishedDate)" -ForegroundColor Gray
+        } else {
+          Write-Warning "Module not yet visible in PSGallery. It may take a few minutes to appear."
+        }
