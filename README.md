@@ -24,8 +24,6 @@ M365IdentityPosture is a comprehensive PowerShell module for security posture as
 - **Identity Protection Insights**: Risk-based access and identity security metrics
 - **Governance Workflows**: Automated compliance and attestation reporting
 
-``` **Migration Note**: Previously named `M365Reporting`. If upgrading, replace `Import-Module M365Reporting` with `Import-Module M365IdentityPosture`. Public function names remain unchanged.
-
 ## ✨ Key Features
 
 ### 📊 Comprehensive Service Coverage
