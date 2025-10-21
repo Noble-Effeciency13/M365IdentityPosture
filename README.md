@@ -195,9 +195,9 @@ Invoke-AuthContextInventoryReport -TenantName "contoso"
 
 ```powershell
 # Full inventory with all services
-Invoke-AuthContextInventoryReport ```
-    -TenantName "contoso" ```
-    -OutputPath "C:\Reports\AuthContext" ```
+Invoke-AuthContextInventoryReport ´
+    -TenantName "contoso" ´
+    -OutputPath "C:\Reports\AuthContext" ´
     -UserPrincipalName "admin@contoso.com"
 ```
 
@@ -205,9 +205,9 @@ Invoke-AuthContextInventoryReport ```
 
 ```powershell
 # Run quietly with custom HTML path
-Invoke-AuthContextInventoryReport ```
-    -TenantName "contoso" ```
-    -HtmlReportPath "D:\Security\AuthContext_$(Get-Date -Format 'yyyyMMdd').html" ```
+Invoke-AuthContextInventoryReport ´
+    -TenantName "contoso" ´
+    -HtmlReportPath "D:\Security\AuthContext_$(Get-Date -Format 'yyyyMMdd').html" ´
     -Quiet ```
     -NoAutoOpen
 ```
@@ -216,8 +216,8 @@ Invoke-AuthContextInventoryReport ```
 
 ```powershell
 # Skip Azure resource PIM enumeration (faster)
-Invoke-AuthContextInventoryReport ```
-    -TenantName "contoso" ```
+Invoke-AuthContextInventoryReport ´
+    -TenantName "contoso" ´
     -ExcludeAzure
 ```
 
@@ -230,8 +230,8 @@ $subscriptions = @(
     'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
 )
 
-Invoke-AuthContextInventoryReport ```
-    -TenantName "contoso" ```
+Invoke-AuthContextInventoryReport ´
+    -TenantName "contoso" ´
     -AzureSubscriptionIds $subscriptions
 ```
 
@@ -333,14 +333,14 @@ Reports include a theme toggle button for instant switching without regeneration
 
 The M365IdentityPosture module is actively expanding to include:
 
-### Q1 2025 - Access Governance
+### Access Governance
 - **Access Package Reports**
   - Access package utilization metrics
   - Assignment lifecycle analytics
   - Approval workflow analysis
   - Expiration and recertification tracking
 
-### Q2 2025 - Privileged Access
+### Privileged Access
 - **Role Assignment Reports**
   - Privileged role usage patterns
   - Role activation history
@@ -348,7 +348,7 @@ The M365IdentityPosture module is actively expanding to include:
   - Separation of duties analysis
   - Role mining recommendations
 
-### Q3 2025 - Policy Analytics
+### Policy Analytics
 - **Conditional Access Gap Analysis**
   - Uncovered users and applications
   - Policy overlap and conflicts
@@ -356,7 +356,7 @@ The M365IdentityPosture module is actively expanding to include:
   - Sign-in risk coverage
   - Location-based access patterns
 
-### Q4 2025 - Identity Protection
+### Identity Protection
 - **Identity Security Dashboard**
   - Security defaults assessment
   - Identity Protection policy effectiveness
@@ -370,6 +370,7 @@ The M365IdentityPosture module is actively expanding to include:
 - Automated remediation recommendations
 - Integration with Microsoft Secure Score
 - Custom compliance framework mapping
+- Maester integration
 
 ## 🔍 Troubleshooting
 
@@ -490,18 +491,6 @@ When adding a new security or identity report:
 - Test with PowerShell 7+ on multiple platforms
 - Use tab characters for indentation (not spaces)
 - Include comprehensive comment-based help
-
-## 🧪 Testing
-
-Run the included smoke tests to verify module integrity:
-
-```powershell
-# Run smoke test
-& ".\Tests\SmokeTest.ps1"
-
-# Run with Pester (if installed)
-Invoke-Pester -Path ".\Tests" -Output Detailed
-```
 
 ## 🌟 Community
 
