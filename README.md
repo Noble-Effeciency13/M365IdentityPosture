@@ -184,7 +184,7 @@ Import-Module M365IdentityPosture
 Import-Module M365IdentityPosture
 
 # Run the authentication context inventory report
-Invoke-AuthContextInventoryReport -TenantName "contoso"
+Invoke-AuthContextInventoryReport
 ```
 
 ### Detailed Examples
@@ -206,7 +206,7 @@ Invoke-AuthContextInventoryReport ´
 Invoke-AuthContextInventoryReport ´
     -TenantName "contoso" ´
     -HtmlReportPath "D:\Security\AuthContext_$(Get-Date -Format 'yyyyMMdd').html" ´
-    -Quiet ```
+    -Quiet ´
     -NoAutoOpen
 ```
 
