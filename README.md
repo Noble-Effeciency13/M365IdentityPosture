@@ -23,6 +23,7 @@ M365IdentityPosture is a comprehensive PowerShell module for security posture as
 - **Conditional Access Gap Analysis**: Policy coverage and security gap identification
 - **Identity Protection Insights**: Risk-based access and identity security metrics
 - **Governance Workflows**: Automated compliance and attestation reporting
+- **Enhanced reporting capabilities**: Multiple export options for further analysis, Dashboards with KPIs and Trends
 
 ## ✨ Key Features
 
@@ -62,10 +63,8 @@ M365IdentityPosture is a comprehensive PowerShell module for security posture as
 ### 📈 Reporting Capabilities
 
 - **Interactive HTML Reports** with rich formatting and data visualization
-- **Comprehensive Metrics Dashboard** with KPIs and trends
 - **Cross-Reference Analysis** between all services
 - **Detailed Inventory Tables** with filtering and sorting
-- **Export-Ready Data** in multiple formats for further analysis
 - **Executive Summaries** for leadership reporting
 
 ## 💡 Use Cases
