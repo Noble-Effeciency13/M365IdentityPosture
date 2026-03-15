@@ -33,6 +33,7 @@ function Resolve-AndProjectPIMPolicies {
 		[Parameter()] [hashtable] $GroupsById,
 		[switch] $NoProgress
 	)
+	$null = $GroupsById
 
 	$dirExport = @(); $grpExport = @()
 
@@ -58,23 +59,23 @@ function Resolve-AndProjectPIMPolicies {
 			$roleDefinitionResponse = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/roleManagement/directory/roleDefinitions/$roleDefIdVal?`$select=id,displayName" -ErrorAction Stop
 			if ($roleDefinitionResponse.id) { $roleMap[$roleDefinitionResponse.id] = $roleDefinitionResponse.displayName; continue }
 		}
-		catch {}
+		catch { Write-Verbose "Failed to resolve directory role definition ${roleDefIdVal}: $($_)" }
 		try {
 			$roleTemplateResponse = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/directoryRoleTemplates/$roleDefIdVal?`$select=id,displayName" -ErrorAction Stop
 			if ($roleTemplateResponse.id) { $roleMap[$roleTemplateResponse.id] = $roleTemplateResponse.displayName; continue }
 		}
-		catch {}
+		catch { Write-Verbose "Failed to resolve directory role template ${roleDefIdVal}: $($_)" }
 		try {
 			$roleTemplateFilter = [uri]::EscapeDataString("roleTemplateId eq '$roleDefIdVal'")
 			$directoryRolesResponse = Invoke-MgGraphRequest -Method GET -Uri "https://graph.microsoft.com/v1.0/directoryRoles?`$filter=$roleTemplateFilter&`$select=id,displayName" -ErrorAction Stop
 			if ($directoryRolesResponse.value -and $directoryRolesResponse.value.Count -gt 0) { $roleMap[$roleDefIdVal] = $directoryRolesResponse.value[0].displayName; continue }
 		}
-		catch {}
+		catch { Write-Verbose "Failed to resolve directory roles for template ${roleDefIdVal}: $($_)" }
 		try {
 			$resolvedRoleName = Resolve-DirectoryRoleName -RoleId $roleDefIdVal
 			if ($resolvedRoleName) { $roleMap[$roleDefIdVal] = $resolvedRoleName; continue }
 		}
-		catch {}
+		catch { Write-Verbose "Failed to resolve role name via helper for ${roleDefIdVal}: $($_)" }
 	}
 	if (-not $NoProgress) { Write-Progress -Id 8 -Activity 'PIM Role Mapping' -Completed -Status 'Role name resolution complete' }
 

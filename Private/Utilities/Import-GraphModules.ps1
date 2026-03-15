@@ -20,7 +20,7 @@ function Import-GraphModules {
 	#>
 	[CmdletBinding()] param([switch]$QuietMode)
 	if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) { throw 'Microsoft.Graph modules not installed.' }
-	Invoke-ModuleOperation -Name Microsoft.Graph.Authentication -Operation Import | Out-Null
-	Invoke-ModuleOperation -Name Microsoft.Graph.Groups -Operation Import | Out-Null
+	Invoke-ModuleOperation -Name Microsoft.Graph.Authentication -Operation Import -QuietMode:$QuietMode | Out-Null
+	Invoke-ModuleOperation -Name Microsoft.Graph.Groups -Operation Import -QuietMode:$QuietMode | Out-Null
 	return $true
 }

@@ -39,9 +39,7 @@ function Invoke-GracefulCleanup {
 				Disconnect-ExchangeOnline -Confirm:$false -ErrorAction SilentlyContinue | Out-Null 
 			} 
 		} 
-		catch { 
-			# Silent failure
-		}
+		catch { Write-Verbose ("ExchangeOnline disconnect failed: {0}" -f $_.Exception.Message) }
 		
 		# Disconnect SharePoint Online
 		try { 
@@ -49,9 +47,7 @@ function Invoke-GracefulCleanup {
 				Disconnect-SPOService -ErrorAction SilentlyContinue | Out-Null 
 			} 
 		} 
-		catch { 
-			# Silent failure
-		}
+		catch { Write-Verbose ("SharePoint disconnect failed: {0}" -f $_.Exception.Message) }
 		
 		# Disconnect Azure
 		try { 
@@ -59,9 +55,7 @@ function Invoke-GracefulCleanup {
 				Disconnect-AzAccount -Scope Process -ErrorAction SilentlyContinue | Out-Null 
 			} 
 		} 
-		catch { 
-			# Silent failure
-		}
+		catch { Write-Verbose ("Azure disconnect failed: {0}" -f $_.Exception.Message) }
 		
 		# Disconnect Microsoft Graph
 		try { 
@@ -69,9 +63,7 @@ function Invoke-GracefulCleanup {
 				Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null 
 			} 
 		} 
-		catch { 
-			# Silent failure
-		}
+		catch { Write-Verbose ("Graph disconnect failed: {0}" -f $_.Exception.Message) }
 	}
 	finally {
 		# Restore original preference variables

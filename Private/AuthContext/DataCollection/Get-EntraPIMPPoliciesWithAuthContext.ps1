@@ -16,6 +16,7 @@ function Get-EntraPIMPPoliciesWithAuthContext {
     	PSCustomObject: PolicyId, ScopeId, ScopeType, RoleDefinitionId, AuthContextIds, AuthContextClassRefs, RawContainsAuthContext, RulesJson
   	#>
 	[CmdletBinding()] param([object[]]$AuthContexts)
+	$null = $AuthContexts
 	$policies = @()
 	$uri = "https://graph.microsoft.com/v1.0/policies/roleManagementPolicies?`$filter=scopeId%20eq%20'/'%20and%20scopeType%20eq%20'Directory'&`$expand=rules"
 	try { $resp = Invoke-MgGraphRequest -Method GET -Uri $uri -ErrorAction Stop } catch { Write-Warning "Directory PIM policies retrieval failed: $($_.Exception.Message)"; return @() }

@@ -95,7 +95,7 @@ function Get-ConditionalAccessPoliciesWithAuthContext {
 					}
 				}
 			}
-			catch { }
+			catch { Write-Verbose "Failed to parse authentication context references from policy $($currentPolicy.id): $_" }
 		}
 		$authenticationContextIds = $authenticationContextIds | Sort-Object -Unique
 		$authenticationContextClassReferences = $authenticationContextClassReferences | Sort-Object -Unique

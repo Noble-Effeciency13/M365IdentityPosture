@@ -43,7 +43,9 @@ function Invoke-GroupPhase {
 					if ($assignedLabelData.labelId) { $sensitivityLabelId = $assignedLabelData.labelId }
 				}
 			}
-			catch { }
+			catch {
+				Write-Verbose ("Failed to retrieve assignedLabels for group {0}: {1}" -f $currentGroup.id, $_.Exception.Message)
+			}
 			$enrichedGroupsWithLabels += [pscustomobject]@{
 				DisplayName               = $currentGroup.displayName
 				PrimarySmtpAddress        = $currentGroup.mail

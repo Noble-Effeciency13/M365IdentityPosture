@@ -31,8 +31,7 @@ function Connect-AzContextSafe {
 		[string]$AccountUpn,
 		[switch]$QuietMode
 	)
-	$reused = $false
-	$existingContext = $null; try { $existingContext = Get-AzContext -ErrorAction Stop } catch {}
+	$existingContext = $null; try { $existingContext = Get-AzContext -ErrorAction Stop } catch { Write-Verbose 'Get-AzContext lookup failed.' }
 	if ($existingContext) {
 		$DataObject.IsAzureConnected = $true
 		$reused = $true
@@ -41,7 +40,7 @@ function Connect-AzContextSafe {
 	}
 	if (-not $QuietMode) { Write-Host '[Azure] Connecting...' -ForegroundColor Green }
 	$acct = $AccountUpn
-	if (-not $acct) { try { $acct = (Get-AzContext -ErrorAction SilentlyContinue).Account } catch {} }
+	if (-not $acct) { try { $acct = (Get-AzContext -ErrorAction SilentlyContinue).Account } catch { Write-Verbose 'Unable to read Account from Az context.' } }
 	$retries = 0; $max = 3; $delay = 2
 	while (-not $DataObject.IsAzureConnected -and $retries -lt $max) {
 		try {
@@ -56,6 +55,7 @@ function Connect-AzContextSafe {
 		}
 		catch {
 			$retries++
+			Write-Verbose ("Azure connect attempt {0} failed: {1}" -f $retries, $_.Exception.Message)
 			if ($retries -lt $max) { Start-Sleep -Seconds $delay; $delay = [Math]::Min($delay * 2, 10) } else { $DataObject.ProcessingErrors.Add($_.Exception.Message) }
 		}
 	}

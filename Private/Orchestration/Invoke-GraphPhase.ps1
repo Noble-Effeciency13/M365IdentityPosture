@@ -18,10 +18,14 @@ function Invoke-GraphPhase {
 	.EXAMPLE
 		$authContexts = Invoke-GraphPhase -QuietMode
 	#>
-	[CmdletBinding()] param([switch]$QuietMode)
+	[CmdletBinding()] param(
+		[switch]$QuietMode,
+		[string]$TenantId,
+		[string]$ClientId
+	)
 	Import-GraphModules -QuietMode:$QuietMode | Out-Null
 	if (-not $QuietMode) { Write-Host '[Graph] Connecting...' -ForegroundColor Green }
-	if (-not (Connect-GraphSafe -QuietMode:$QuietMode)) { throw 'Graph connection failed.' }
+	if (-not (Connect-GraphSafe -QuietMode:$QuietMode -TenantId:$TenantId -ClientId:$ClientId)) { throw 'Graph connection failed.' }
 	$authContexts = Get-AuthenticationContexts -QuietMode:$QuietMode
 	return $authContexts
 }

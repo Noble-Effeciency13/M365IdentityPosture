@@ -30,7 +30,7 @@ function Invoke-AzurePhase {
 		$UPN = (Get-MgContext -ErrorAction SilentlyContinue).Account 
 	} 
 	catch { 
-		# Silent failure - continue without UPN
+		Write-Verbose "Failed to read Graph context account: $($_)"
 	}
 	
 	# Try to get tenant ID from Graph context first, then Az context
@@ -38,7 +38,7 @@ function Invoke-AzurePhase {
 		$tenantId = (Get-MgContext -ErrorAction SilentlyContinue).TenantId 
 	} 
 	catch { 
-		# Silent failure - try Az context
+		Write-Verbose "Failed to read Graph context tenantId: $($_)"
 	}
 	
 	if (-not $tenantId) { 
@@ -46,7 +46,7 @@ function Invoke-AzurePhase {
 			$tenantId = (Get-AzContext -ErrorAction SilentlyContinue).Tenant.Id 
 		} 
 		catch { 
-			# Silent failure - continue without tenant ID
+			Write-Verbose "Failed to read Az context tenantId: $($_)"
 		} 
 	}
 	

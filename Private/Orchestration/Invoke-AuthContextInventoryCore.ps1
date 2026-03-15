@@ -1,4 +1,4 @@
-function Invoke-AuthContextInventoryCore {
+﻿function Invoke-AuthContextInventoryCore {
 	<#
 	.SYNOPSIS
 		Core orchestration function for authentication context inventory collection.
@@ -22,6 +22,12 @@ function Invoke-AuthContextInventoryCore {
 
 	.PARAMETER UserPrincipalName
 		User principal name for authentication context.
+
+	.PARAMETER TenantId
+		Optional tenant ID to force Graph connections to a specific tenant (useful for multi-tenant or app-only scenarios).
+
+	.PARAMETER ClientId
+		Optional client ID for custom application authentication when connecting to Microsoft Graph.
 
 	.PARAMETER HtmlReportPath
 		Path for the generated HTML report.
@@ -66,6 +72,8 @@ function Invoke-AuthContextInventoryCore {
 		[string]$TenantName,
 		[string]$OutputPath,
 		[string]$UserPrincipalName,
+		[string]$TenantId,
+		[string]$ClientId,
 		[string]$HtmlReportPath,
 		[string]$HtmlStyle,
 		[string]$HtmlLayout,
@@ -91,7 +99,8 @@ Please install PowerShell 7+ from: https://github.com/PowerShell/PowerShell/rele
 	#region Script Metadata
 	# Global script state variables
 	$script:ToolVersion = '1.0.0'
-	$Global:AuthContextTimestamp = (Get-Date -AsUTC).ToString('yyyyMMdd_HHmmss')
+	$script:AuthContextTimestamp = (Get-Date -AsUTC).ToString('yyyyMMdd_HHmmss')
+	if ($TenantId) { $script:CurrentTenantId = $TenantId }
 	#endregion
 
 	#region Initialization and Derived Flags
@@ -147,7 +156,7 @@ Please install PowerShell 7+ from: https://github.com/PowerShell/PowerShell/rele
 
 	if (-not $Quiet) { Write-Host '[Phase 2] Microsoft Graph' -ForegroundColor Cyan }
 	try { Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null } catch {}
-	$authContexts = Invoke-GraphPhase -QuietMode:$Quiet
+	$authContexts = Invoke-GraphPhase -QuietMode:$Quiet -TenantId:$TenantId -ClientId:$ClientId
 	# Populate tenant metadata
 	$script:CurrentTenantId = $null; $script:TenantShortName = $null
 	$meta = Get-GraphTenantMetadata
@@ -704,7 +713,7 @@ Please install PowerShell 7+ from: https://github.com/PowerShell/PowerShell/rele
 	}
 	catch { if (-not $Quiet) { Write-Host '   ✗ Report data preparation failed' -ForegroundColor Red } }
 
-	$htmlPath = if ($HtmlReportPath) { $HtmlReportPath } else { Join-Path $OutputPath ("AuthContext_Inventory_${Global:AuthContextTimestamp}.html") }
+	$htmlPath = if ($HtmlReportPath) { $HtmlReportPath } else { Join-Path $OutputPath ("AuthContext_Inventory_${script:AuthContextTimestamp}.html") }
 	try {
 		$caHtml = if ($script:caPoliciesExport) { $script:caPoliciesExport } else { $caPolicies }
 		# Prefer projected export (already normalized). If absent, derive minimal projection from raw policies retaining context tokens.

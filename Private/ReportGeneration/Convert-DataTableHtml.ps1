@@ -20,6 +20,7 @@ function Convert-DataTableHtml {
 		$htmlTable = Convert-DataTableHtml -Data $users -Title "User List"
 	#>
 	param($Data, $Title)
+	$null = $Title
     
 	if (-not $Data) { 
 		return '<p>No data</p>' 

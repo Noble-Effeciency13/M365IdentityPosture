@@ -3,7 +3,7 @@
 	RootModule           = 'M365IdentityPosture.psm1'
     
 	# Version number of this module.
-	ModuleVersion        = '1.0.0'
+	ModuleVersion        = '1.1.0'
     
 	# Supported PSEditions
 	CompatiblePSEditions = @('Core')
@@ -24,17 +24,18 @@
 	Description          = @'
 Comprehensive security posture assessment and identity governance reporting framework for Microsoft 365 and Azure environments.
 
-Current Release (v1.0): Authentication Context Inventory
-- Complete discovery and analysis of authentication context usage across all Microsoft 365 services
+Current Release (v1.1): Authentication Context Inventory & Access Package Documentor
+- Authentication Context Inventory: Complete discovery and analysis of authentication context usage across all Microsoft 365 services
+- Access Package Documentor: Interactive visualization and documentation of Entitlement Management access packages, catalogs, policies, and resource assignments
 - Purview sensitivity labels with embedded authentication requirements
 - Conditional Access policies referencing authentication contexts
 - Privileged Identity Management (PIM) policies for directory roles, groups, and Azure resources
 - SharePoint sites with direct or inherited authentication context assignments
 - Microsoft 365 Groups and Teams with context-enforcing sensitivity labels
 - Protected actions (RBAC) requiring authentication contexts
-- Cross-service correlation with rich HTML reporting and metrics dashboard
+- Cross-service correlation with rich HTML reporting, interactive graph visualization, and metrics dashboard
 
-Designed as an extensible framework for future identity and security analytics including Access Package reporting, 
+Designed as an extensible framework for future identity and security analytics including enhanced Access Package analytics, 
 Role Assignment auditing, Conditional Access gap analysis, and Identity Protection insights.
 '@
     
@@ -75,8 +76,9 @@ Role Assignment auditing, Conditional Access gap analysis, and Identity Protecti
 	# NestedModules = @()
     
 	# Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-	FunctionsToExport    = @(
-		'Invoke-AuthContextInventoryReport'
+    FunctionsToExport    = @(
+		'Invoke-AuthContextInventoryReport',
+		'Invoke-AccessPackageDocumentor'
 	)
     
 	# Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.

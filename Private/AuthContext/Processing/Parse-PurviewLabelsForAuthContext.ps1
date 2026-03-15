@@ -33,7 +33,7 @@ function Parse-PurviewLabelsForAuthContext {
 								if ($protectionLevelData.Id) { $authenticationContextId = $protectionLevelData.Id }
 								if ($protectionLevelData.DisplayName) { $authenticationContextName = $protectionLevelData.DisplayName }
 							}
-							catch {}
+							catch { Write-Verbose "Failed to parse protectionlevel data for label $($currentLabel.Guid): $_" }
 						}
 					}
 				}

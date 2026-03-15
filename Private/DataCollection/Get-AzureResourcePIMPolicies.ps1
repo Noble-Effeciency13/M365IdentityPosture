@@ -58,7 +58,9 @@ function Get-AzureResourcePIMPolicies {
 			$currentMgContext = Get-MgContext -ErrorAction SilentlyContinue
 			if ($currentMgContext -and $currentMgContext.Account) { $AccountUpn = $currentMgContext.Account }
 		}
-		catch {}
+		catch {
+			Write-Verbose 'Unable to derive AccountUpn from current Graph context.'
+		}
 	}
 
 	# Ensure Az is connected once (reuse Graph identity) without prompting
@@ -67,11 +69,11 @@ function Get-AzureResourcePIMPolicies {
 	if (-not $isAzureConnected) {
 		if (-not $Quiet) { Write-Host '     → Azure authentication...' -ForegroundColor DarkCyan }
 		$azureAccountUpn = $AccountUpn
-		if (-not $azureAccountUpn) { try { $azureAccountUpn = (Get-MgContext -ErrorAction SilentlyContinue).Account } catch {} }
+		if (-not $azureAccountUpn) { try { $azureAccountUpn = (Get-MgContext -ErrorAction SilentlyContinue).Account } catch { Write-Verbose 'Unable to read Account from Graph context.' } }
 		$azureTenantId = $TenantId
 		if (-not $azureTenantId) { $azureTenantId = $script:CurrentTenantId }
-		if (-not $azureTenantId) { try { $azureTenantId = (Get-MgContext -ErrorAction SilentlyContinue).TenantId } catch {} }
-		if (-not $azureTenantId) { try { $azureTenantId = (Get-AzContext -ErrorAction SilentlyContinue).Tenant.Id } catch {} }
+		if (-not $azureTenantId) { try { $azureTenantId = (Get-MgContext -ErrorAction SilentlyContinue).TenantId } catch { Write-Verbose 'Unable to read TenantId from Graph context.' } }
+		if (-not $azureTenantId) { try { $azureTenantId = (Get-AzContext -ErrorAction SilentlyContinue).Tenant.Id } catch { Write-Verbose 'Unable to read TenantId from Az context.' } }
 		if (-not $azureTenantId) { return @() }
 		$previousWarningPreference = $WarningPreference; $previousInformationPreference = $InformationPreference; $previousProgressPreference = $ProgressPreference; $previousVerbosePreference = $VerbosePreference; $previousDebugPreference = $DebugPreference
 		$WarningPreference = 'SilentlyContinue'; $InformationPreference = 'SilentlyContinue'; $ProgressPreference = 'SilentlyContinue'; $VerbosePreference = 'SilentlyContinue'; $DebugPreference = 'SilentlyContinue'
@@ -84,6 +86,7 @@ function Get-AzureResourcePIMPolicies {
 				}
 				catch {
 					$connectionRetries++
+					Write-Verbose ("Azure authentication attempt {0} failed: {1}" -f $connectionRetries, $_.Exception.Message)
 					if ($connectionRetries -lt $maxConnectionRetries) { Start-Sleep -Seconds $retryDelaySeconds; $retryDelaySeconds = [Math]::Min($retryDelaySeconds * 2, 10) }
 				}
 			}
@@ -99,9 +102,9 @@ function Get-AzureResourcePIMPolicies {
 	try {
 		$env:AZURE_PS_LOAD_ADDITIONAL_MODULES = 'true'
 		$tenantIdForContext = $TenantId; if (-not $tenantIdForContext) { $tenantIdForContext = $script:CurrentTenantId }
-		if (-not $tenantIdForContext) { try { $tenantIdForContext = (Get-AzContext -ErrorAction SilentlyContinue).Tenant.Id } catch {} }
+		if (-not $tenantIdForContext) { try { $tenantIdForContext = (Get-AzContext -ErrorAction SilentlyContinue).Tenant.Id } catch { Write-Verbose 'Unable to read tenant id from Az context.' } }
 		if ($tenantIdForContext) { 
-			try { Set-AzContext -Tenant $tenantIdForContext -ErrorAction SilentlyContinue | Out-Null } catch {} 
+			try { Set-AzContext -Tenant $tenantIdForContext -ErrorAction SilentlyContinue | Out-Null } catch { Write-Verbose 'Unable to set Az context to tenant.' } 
 		}
 		# Suppress progress/host output during subscription enumeration to reduce noise
 		$storedWarningPreference = $WarningPreference; $storedProgressPreference = $ProgressPreference; $WarningPreference = 'SilentlyContinue'; $ProgressPreference = 'SilentlyContinue'
@@ -130,11 +133,12 @@ function Get-AzureResourcePIMPolicies {
 				}
 			}
 			catch {
+				Write-Verbose ("ARM subscription enumeration failed: {0}" -f $_.Exception.Message)
 				# Fallback to PowerShell cmdlet if REST API fails
 				$allAzureSubscriptions = & {
 					Get-AzSubscription -TenantId $tenantIdForContext -ErrorAction Stop -WarningAction SilentlyContinue
 				} 2>$null 3>$null 4>$null 5>$null 6>$null
-        
+
 				# Double-filter to ensure we only get subscriptions from the current tenant
 				$availableSubscriptions = $allAzureSubscriptions | Where-Object { 
 					$_.TenantId -eq $tenantIdForContext -and 
@@ -144,7 +148,10 @@ function Get-AzureResourcePIMPolicies {
 		}
 		finally { $ProgressPreference = $storedProgressPreference; $WarningPreference = $storedWarningPreference }
 	}
-	catch { $availableSubscriptions = @() }
+	catch { 
+		Write-Verbose ("Failed to enumerate subscriptions: {0}" -f $_.Exception.Message)
+		$availableSubscriptions = @() 
+	}
   
 	# Verify tenant filtering results
 	if ($availableSubscriptions -and $tenantIdForContext) {
@@ -313,7 +320,7 @@ function Get-AzureResourcePIMPolicies {
 						}
 					}
 					catch {
-						# If REST API fails, continue to fallback
+						Write-Verbose "Failed to resolve role definition $roleDefinitionId via REST: $($_)"
 					}
           
 					# Fallback to truncated role ID if name resolution fails

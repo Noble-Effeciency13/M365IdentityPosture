@@ -37,7 +37,11 @@ function Connect-PurviewService {
 		$DataObject.IsExchangeOnlineConnected = $true
 		if (-not $QuietMode) { Write-Host '[EXO] Module imported' -ForegroundColor DarkGray }
 	}
-	catch { $DataObject.ProcessingErrors += $_.Exception.Message; return $DataObject }
+	catch {
+		$DataObject.ProcessingErrors += $_.Exception.Message
+		Write-Verbose ("ExchangeOnlineManagement import failed: {0}" -f $_.Exception.Message)
+		return $DataObject
+	}
 
 	if (-not $QuietMode) { Write-Host '[Purview] Connecting IPPSSession...' -ForegroundColor Green }
 	$prevWarn = $WarningPreference; $prevInfo = $InformationPreference

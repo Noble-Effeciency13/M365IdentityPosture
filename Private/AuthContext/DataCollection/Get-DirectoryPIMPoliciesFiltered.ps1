@@ -62,7 +62,7 @@ function Get-DirectoryPIMPoliciesFiltered {
 		}
 	}
 	catch { 
-		# Silent failure for assignments - continue without role mapping
+		Write-Verbose "Failed to retrieve directory PIM policy assignments: $_"
 	}
 	
 	if (-not $NoProgress) { 

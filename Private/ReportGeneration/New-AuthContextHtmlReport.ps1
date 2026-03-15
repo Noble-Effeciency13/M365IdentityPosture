@@ -1,4 +1,4 @@
-function New-AuthContextHtmlReport {
+﻿function New-AuthContextHtmlReport {
 	<#
 	.SYNOPSIS
 		Builds a static HTML report consolidating all Authentication Context usage artifacts.
@@ -50,7 +50,9 @@ function New-AuthContextHtmlReport {
 	.EXAMPLE
 		New-AuthContextHtmlReport -AuthContexts $ac -Labels $lbl -Sites $sites -Groups $grps -CA $ca -ProtectedActions $pa -PIMPoliciesEntra $pimE -PIMPoliciesGroups $pimG -PIMPoliciesAzureResources $pimAz -Path report.html
 	#>
-	[CmdletBinding()] param(
+	[CmdletBinding(SupportsShouldProcess = $true)]
+	[OutputType([string])]
+	param(
 		[Parameter(Mandatory)][object]$AuthContexts,
 		[Parameter(Mandatory)][object]$Labels,
 		[Parameter(Mandatory)][object]$Sites,
@@ -66,6 +68,7 @@ function New-AuthContextHtmlReport {
 		[switch]$GenerateAllThemesForLayout,
 		[switch]$QuietMode
 	)
+	$null = $Path, $GenerateAllThemesForLayout, $QuietMode
 
 	$Sites = SanitizeAuthContextText $Sites
 	$Groups = SanitizeAuthContextText $Groups
@@ -86,8 +89,9 @@ function New-AuthContextHtmlReport {
 		'PIM Policies for Groups'          = ($PIMPoliciesGroups | Measure-Object).Count
 		'PIM Policies for Azure Resources' = ($PIMPoliciesAzureResources | Measure-Object).Count
 	}
-  
+
 	$ts = Get-Date
+	$null = $ts
 	$sections = @(
 		@{Title = 'Authentication Contexts'; Data = $AuthContexts },
 		@{Title = 'Sensitivity Labels'; Data = $Labels },
@@ -100,7 +104,7 @@ function New-AuthContextHtmlReport {
 		@{Title = 'PIM Policies for Azure Resources'; Data = $PIMPoliciesAzureResources }
 	)
 	# Dual-mode CSS (Classic light & Dark) via CSS variables
-	$css = 'body{font-family:Segoe UI,Arial,sans-serif;margin:0;--bg:#f5f7fa;--text:#222;--panel:#fff;--panel-border:#e2e7ef;--accent:#0f4c81;--muted:#555;--hover:#f9fcff;--kpi-bg:#fff;--footer:#666;background:var(--bg);color:var(--text)}body.dark-mode{--bg:#1e1f24;--text:#e6e6e6;--panel:#26282e;--panel-border:#3b3d44;--accent:#4da3ff;--muted:#9aa4b1;--hover:#31343a;--kpi-bg:#2b2d33;--footer:#9aa4b1}header{background:var(--accent);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:16px}header h1{margin:0;font-size:22px;flex:1}button.theme-toggle{background:#fff;color:var(--accent);border:1px solid var(--accent);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}body.dark-mode button.theme-toggle{background:#2b2d33;color:var(--accent);border-color:#2b2d33}.kpis{display:flex;flex-wrap:wrap;margin:20px}.kpi{background:var(--kpi-bg);border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08);padding:14px 18px;margin:8px;flex:1 1 160px;min-width:160px}.kpi h3{margin:0 0 6px;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--muted)}.kpi .val{font-size:26px;font-weight:600;color:var(--accent)}section{margin:25px 28px;background:var(--panel);padding:18px 22px 28px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.08)}section h2{margin:0 0 10px;font-size:18px;color:var(--accent);display:flex;align-items:center;cursor:pointer}section h2 .chevron{margin-left:8px;transition:transform .25s}section.collapsed .chevron{transform:rotate(-90deg)}table{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--panel-border)}th{background:color-mix(in srgb,var(--accent) 15%,#fff);cursor:pointer;position:relative}body.dark-mode th{background:#30333a;color:#cdd3db}th.sort-asc::after,th.sort-desc::after{content:"";border:5px solid transparent;position:absolute;right:8px;top:50%;transform:translateY(-50%)}th.sort-asc::after{border-bottom-color:var(--accent);margin-top:-6px}th.sort-desc::after{border-top-color:var(--accent);margin-top:4px}tr:hover{background:var(--hover)}footer{margin:40px 0 0;padding:20px 28px;font-size:11px;color:var(--footer);text-align:center}body.dark-mode .tab-button{color:#e6e6e6}body.dark-mode .tab-button.active{color:#fff}body.dark-mode .tab-pane h2{color:var(--accent)}body.dark-mode .overview-stack h3{color:#cdd3db}'
+	$css = 'body{font-family:Segoe UI,Arial,sans-serif;margin:0;padding-bottom:50px;--bg:#f5f7fa;--text:#222;--panel:#fff;--panel-border:#e2e7ef;--accent:#0f4c81;--muted:#555;--hover:#f9fcff;--kpi-bg:#fff;--footer:#666;background:var(--bg);color:var(--text)}body.dark-mode{--bg:#1e1f24;--text:#e6e6e6;--panel:#26282e;--panel-border:#3b3d44;--accent:#4da3ff;--muted:#9aa4b1;--hover:#31343a;--kpi-bg:#2b2d33;--footer:#9aa4b1}header{background:var(--accent);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:16px}header h1{margin:0;font-size:22px;flex:1}button.theme-toggle{background:#fff;color:var(--accent);border:1px solid var(--accent);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600}body.dark-mode button.theme-toggle{background:#2b2d33;color:var(--accent);border-color:#2b2d33}.kpis{display:flex;flex-wrap:wrap;margin:20px}.kpi{background:var(--kpi-bg);border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08);padding:14px 18px;margin:8px;flex:1 1 160px;min-width:160px}.kpi h3{margin:0 0 6px;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--muted)}.kpi .val{font-size:26px;font-weight:600;color:var(--accent)}section{margin:25px 28px;background:var(--panel);padding:18px 22px 28px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.08)}section h2{margin:0 0 10px;font-size:18px;color:var(--accent);display:flex;align-items:center;cursor:pointer}section h2 .chevron{margin-left:8px;transition:transform .25s}section.collapsed .chevron{transform:rotate(-90deg)}table{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--panel-border)}th{background:color-mix(in srgb,var(--accent) 15%,#fff);cursor:pointer;position:relative}body.dark-mode th{background:#30333a;color:#cdd3db}th.sort-asc::after,th.sort-desc::after{content:"";border:5px solid transparent;position:absolute;right:8px;top:50%;transform:translateY(-50%)}th.sort-asc::after{border-bottom-color:var(--accent);margin-top:-6px}th.sort-desc::after{border-top-color:var(--accent);margin-top:4px}tr:hover{background:var(--hover)}footer{position:fixed;bottom:0;left:0;width:100%;background:var(--panel);border-top:1px solid var(--panel-border);padding:6px 12px;display:flex;align-items:center;justify-content:center;font-size:12.5px;text-align:center;gap:8px;z-index:1000;box-shadow:0 -2px 8px rgba(0,0,0,.08)}.footer-link{color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px}.footer-link:hover{text-decoration:underline}.footer-separator{color:var(--muted);margin:0 4px}.footer-motto{font-style:italic;color:var(--muted)}@media(max-width:768px){footer{font-size:10px;gap:4px}.footer-separator{margin:0 2px}}body.dark-mode .tab-button{color:#e6e6e6}body.dark-mode .tab-button.active{color:#fff}body.dark-mode .tab-pane h2{color:var(--accent)}body.dark-mode .overview-stack h3{color:#cdd3db}'
 
 	# Build JS bundle depending on layout
 	$jsCommon = @()
@@ -135,57 +139,84 @@ function New-AuthContextHtmlReport {
 	$htmlHeader = '<!DOCTYPE html><html><head><meta charset="utf-8" /><title>Authentication Context Inventory</title><meta name="viewport" content="width=device-width,initial-scale=1" /><style>' + $css + '</style>' + $scriptTag + '</head><body>'
 	$headerBlock = '<header><h1>Authentication Context Inventory</h1><button id="themeToggle" class="theme-toggle" type="button">' + ($Style -eq 'Dark' ? 'Light Mode' : 'Dark Mode') + '</button></header>'
 	$kpiBlock = '<div class="kpis">' + (($kpi.PSObject.Properties | ForEach-Object { "<div class='kpi'><h3>$($_.Name)</h3><div class='val'>$($_.Value)</div></div>" }) -join '') + '</div>'
+	$null = $htmlHeader, $headerBlock, $kpiBlock
 	switch ($Layout) {
 		'Classic' {
-			$bodyBlock = ($sections | ForEach-Object -Begin { $acc = @() } -Process { $acc += "<section><h2>$($_.Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$acc.Count])</section>" } -End { $acc -join '' })
+			$bodySections = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<section><h2>$($sections[$idx].Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$idx])</section>" }
+			$bodyBlock = $bodySections -join ''
 		}
 		'Tabbed' {
-			$tabButtons = ($sections | ForEach-Object -Begin { $i = 0; $btns = @() } -Process { $btns += "<button class='tab-button' data-pid='pane$i'>$($_.Title)</button>"; $i++ } -End { $btns -join '' })
-			$tabPanes = ($sections | ForEach-Object -Begin { $j = 0; $panes = @() } -Process { $panes += "<div class='tab-pane' data-pid='pane$j'><h2>$($_.Title)</h2>$($sectionHtmlBlocks[$j])</div>"; $j++ } -End { $panes -join '' })
-			$bodyBlock = "<div class='tabs'><div class='tab-list'>$tabButtons</div>$tabPanes</div>"
+			$tabButtons = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<button class='tab-button' data-pid='pane$idx'>$($sections[$idx].Title)</button>" }
+			$tabPanes = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<div class='tab-pane' data-pid='pane$idx'><h2>$($sections[$idx].Title)</h2>$($sectionHtmlBlocks[$idx])</div>" }
+			$bodyBlock = "<div class='tabs'><div class='tab-list'>$($tabButtons -join '')</div>$($tabPanes -join '')</div>"
 		}
 		'TabbedOverview' {
-			$overviewContent = ($sections | ForEach-Object -Begin { $o = @() } -Process { $o += "<div class='ov-section'><h3>$($_.Title)</h3>$($sectionHtmlBlocks[$o.Count])</div>" } -End { $o -join '' })
-			$tabButtons = '<button class="tab-button" data-pid="paneOverview">Overview</button>' + ($sections | ForEach-Object -Begin { $i = 0; $btns = @() } -Process { $btns += "<button class='tab-button' data-pid='pane$i'>$($_.Title)</button>"; $i++ } -End { $btns -join '' })
-			$tabPanesOverview = "<div class='tab-pane overview-pane' data-pid='paneOverview'><h2>Overview</h2>$kpiBlock<div class='overview-stack'>$overviewContent</div></div>"
-			$tabPanesSections = ($sections | ForEach-Object -Begin { $j = 0; $panes = @() } -Process { $panes += "<div class='tab-pane' data-pid='pane$j'><h2>$($_.Title)</h2>$($sectionHtmlBlocks[$j])</div>"; $j++ } -End { $panes -join '' })
-			$bodyBlock = "<div class='tabs'><div class='tab-list'>$tabButtons</div>$tabPanesOverview$tabPanesSections</div>"
+			$overviewContent = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<div class='ov-section'><h3>$($sections[$idx].Title)</h3>$($sectionHtmlBlocks[$idx])</div>" }
+			$tabButtons = @('<button class="tab-button" data-pid="paneOverview">Overview</button>')
+			for ($idx = 0; $idx -lt $sections.Count; $idx++) {
+				$tabButtons += "<button class='tab-button' data-pid='pane$idx'>$($sections[$idx].Title)</button>"
+			}
+			$tabButtons = $tabButtons -join ''
+			$tabPanesOverview = "<div class='tab-pane overview-pane' data-pid='paneOverview'><h2>Overview</h2>$kpiBlock<div class='overview-stack'>$($overviewContent -join '')</div></div>"
+			$tabPanesSections = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<div class='tab-pane' data-pid='pane$idx'><h2>$($sections[$idx].Title)</h2>$($sectionHtmlBlocks[$idx])</div>" }
+			$bodyBlock = "<div class='tabs'><div class='tab-list'>$tabButtons</div>$tabPanesOverview$($tabPanesSections -join '')</div>"
 			$kpiBlock = ''
 		}
 		'Sidebar' {
-			$navLinks = ($sections | ForEach-Object -Begin { $x = 0; $links = @() } -Process { $links += "<a href='#sec$x'>$($_.Title)</a>"; $x++ } -End { $links -join '' })
-			$contentSections = ($sections | ForEach-Object -Begin { $y = 0; $secs = @() } -Process { $secs += "<section id='sec$y'><h2>$($_.Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$y])</section>"; $y++ } -End { $secs -join '' })
-			$bodyBlock = "<aside class='nav'><h2>Sections</h2>$navLinks</aside><main class='report'>$kpiBlock$contentSections</main>"; $kpiBlock = ''
+			$navLinks = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<a href='#sec$idx'>$($sections[$idx].Title)</a>" }
+			$contentSections = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<section id='sec$idx'><h2>$($sections[$idx].Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$idx])</section>" }
+			$bodyBlock = "<aside class='nav'><h2>Sections</h2>$($navLinks -join '')</aside><main class='report'>$kpiBlock$($contentSections -join '')</main>"; $kpiBlock = ''
 		}
 		'Masonry' {
-			$masonrySections = ($sections | ForEach-Object -Begin { $z = 0; $cards = @() } -Process { $cards += "<section><h2>$($_.Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$z])</section>"; $z++ } -End { $cards -join '' })
-			$bodyBlock = "<div class='masonry'>$masonrySections</div>"
+			$masonrySections = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<section><h2>$($sections[$idx].Title)<span class='chevron'>▶</span></h2>$($sectionHtmlBlocks[$idx])</section>" }
+			$bodyBlock = "<div class='masonry'>$($masonrySections -join '')</div>"
 		}
 		'Dashboard' {
-			$cards = ($sections | ForEach-Object -Begin { $d = 0; $c = @() } -Process { $countVal = ($sections[$d].Data | Measure-Object).Count; $modalId = "modal$d"; $c += "<div class='card'><h3>$($_.Title)</h3><div class='num'>$countVal</div><button class='detail-open' data-target='$modalId'>Details</button></div>"; $d++ } -End { $c -join '' })
-			$modals = ($sections | ForEach-Object -Begin { $e = 0; $m = @() } -Process { $m += "<div class='modal' id='modal$e'><div class='content'><button class='close' aria-label='Close'>&times;</button><h2>$($_.Title)</h2>$($sectionHtmlBlocks[$e])</div></div>"; $e++ } -End { $m -join '' })
-			$bodyBlock = "<div class='grid-cards'>$cards</div>$modals"; $kpiBlock = ''
+			$cards = for ($idx = 0; $idx -lt $sections.Count; $idx++) { $countVal = ($sections[$idx].Data | Measure-Object).Count; $modalId = "modal$idx"; "<div class='card'><h3>$($sections[$idx].Title)</h3><div class='num'>$countVal</div><button class='detail-open' data-target='$modalId'>Details</button></div>" }
+			$modals = for ($idx = 0; $idx -lt $sections.Count; $idx++) { "<div class='modal' id='modal$idx'><div class='content'><button class='close' aria-label='Close'>&times;</button><h2>$($sections[$idx].Title)</h2>$($sectionHtmlBlocks[$idx])</div></div>" }
+			$bodyBlock = "<div class='grid-cards'>$($cards -join '')</div>$($modals -join '')"; $kpiBlock = ''
 		}
 		'Layoutv2' {
 			$kpiBlock = '<div class="lv2-kpi-bar">' + (($kpi.PSObject.Properties | ForEach-Object { "<div class='lv2-kpi'><span class='kpi-label'>$($_.Name)</span><span class='kpi-value'>$($_.Value)</span></div>" }) -join '') + '</div>'
 			$searchBar = '<div class="lv2-search"><input type="text" id="globalSearch" placeholder="Search all tables..." aria-label="Global search" /></div>'
-			$sectionBlocks = ($sections | ForEach-Object -Begin { $i2 = 0; $b = @() } -Process { $countVal = ($sections[$i2].Data | Measure-Object).Count; $b += "<div class='lv2-card' data-card-index='$i2'><div class='lv2-card-head'><h2>$($_.Title)</h2><span class='count-badge'>$countVal</span><button class='collapse-btn' aria-label='Toggle section'>−</button></div><div class='lv2-card-body'>$($sectionHtmlBlocks[$i2])</div></div>"; $i2++ } -End { $b -join '' })
-			$bodyBlock = "<div class='lv2-container'>$searchBar<div class='lv2-grid'>$sectionBlocks</div></div>"
+			$sectionBlocks = for ($idx = 0; $idx -lt $sections.Count; $idx++) { $countVal = ($sections[$idx].Data | Measure-Object).Count; "<div class='lv2-card' data-card-index='$idx'><div class='lv2-card-head'><h2>$($sections[$idx].Title)</h2><span class='count-badge'>$countVal</span><button class='collapse-btn' aria-label='Toggle section'>−</button></div><div class='lv2-card-body'>$($sectionHtmlBlocks[$idx])</div></div>" }
+			$bodyBlock = "<div class='lv2-container'>$searchBar<div class='lv2-grid'>$($sectionBlocks -join '')</div></div>"
 		}
 	}
-	$footerBlock = "<footer>Generated $($ts.ToString('dd-MM-yyyy')) by Authentication Context Inventory Script v$script:ToolVersion<br>By Sebastian Flæng Markdanner @Chanceofsecurity.com — Style: $Style — Layout: $Layout</footer>"
+	$footerBlock = @"
+<footer>
+	<img src="$script:GitHubLogo" style="width:14px;height:14px;vertical-align:middle;" alt="GitHub">
+	<a href="https://github.com/Noble-Effeciency13/M365IdentityPosture" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+	<span class="footer-separator">|</span>
+	<img src="$script:PSGalleryLogo" style="width:14px;height:14px;vertical-align:middle;" alt="PSGallery">
+	<a href="https://www.powershellgallery.com/packages/M365IdentityPosture" class="footer-link" target="_blank" rel="noopener">PSGallery</a>
+	<span class="footer-separator">|</span>
+	<span class="footer-motto">For the community / By the community</span>
+	<span class="footer-separator">|</span>
+	<img src="$script:SebastianAvatar" style="width:14px;height:14px;vertical-align:middle;border-radius:50%;" alt="Sebastian">
+	<span>Sebastian Flæng Markdanner - <a href="https://www.linkedin.com/in/sebastian-markdanner/" class="footer-link" target="_blank" rel="noopener">LinkedIn</a> // <a href="https://chanceofsecurity.com" class="footer-link" target="_blank" rel="noopener">Blog</a></span>
+	<span class="footer-separator">|</span>
+	<span style="font-size:11px;color:var(--muted);">Generated $($ts.ToString('dd-MM-yyyy')) v$script:ToolVersion</span>
+</footer>
+"@
 	$finalHtml = $htmlHeader + $headerBlock + $kpiBlock + $bodyBlock + $footerBlock + '</body></html>'
+	$null = $bodyBlock, $overviewContent, $kpiBlock
 
 	if ($GenerateAllThemesForLayout) {
 		$base = [System.IO.Path]::GetFileNameWithoutExtension($Path)
 		$dir = [System.IO.Path]::GetDirectoryName($Path)
 		foreach ($theme in 'Default', 'Minimal', 'Dark', 'Compact', 'Accessible', 'Cards') {
 			$themePath = Join-Path $dir ($base + '_' + $Layout + '_' + $theme + '.html')
-			if (-not $QuietMode) { Write-Host "[Report] Generating variant: Layout=$Layout Theme=$theme -> $themePath" -ForegroundColor DarkCyan }
-			New-AuthContextHtmlReport -AuthContexts $AuthContexts -Labels $Labels -Sites $Sites -Groups $Groups -CA $CA -ProtectedActions $ProtectedActions -PIMPoliciesEntra $PIMPoliciesEntra -PIMPoliciesGroups $PIMPoliciesGroups -PIMPoliciesAzureResources $PIMPoliciesAzureResources -Path $themePath -Style $theme -Layout $Layout -QuietMode:$QuietMode | Out-Null
+			if ($PSCmdlet.ShouldProcess($themePath, "Generate report variant (Layout=$Layout, Theme=$theme)")) {
+				if (-not $QuietMode) { Write-Information "[Report] Generating variant: Layout=$Layout Theme=$theme -> $themePath" -InformationAction Continue }
+				New-AuthContextHtmlReport -AuthContexts $AuthContexts -Labels $Labels -Sites $Sites -Groups $Groups -CA $CA -ProtectedActions $ProtectedActions -PIMPoliciesEntra $PIMPoliciesEntra -PIMPoliciesGroups $PIMPoliciesGroups -PIMPoliciesAzureResources $PIMPoliciesAzureResources -Path $themePath -Style $theme -Layout $Layout -QuietMode:$QuietMode | Out-Null
+			}
 		}
 	}
 
-	Set-Content -Path $Path -Value $finalHtml -Encoding UTF8
+	if ($PSCmdlet.ShouldProcess($Path, 'Write authentication context report HTML')) {
+		Set-Content -Path $Path -Value $finalHtml -Encoding UTF8
+	}
 	return $Path
 }
+

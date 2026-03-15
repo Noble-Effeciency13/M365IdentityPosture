@@ -25,7 +25,7 @@ function Get-AuthContextLabels {
 	catch { Write-Warning "Initial Get-Label failed: $($_.Exception.Message)" }
 	if (-not $labels) { return @() }
 	# Always expand each label to ensure LabelActions populated
-	$expanded = foreach ($labelBrief in $labels) { try { Get-Label -Identity $labelBrief.Guid -ErrorAction Stop } catch { $labelBrief } }
+	$expanded = foreach ($labelBrief in $labels) { try { Get-Label -Identity $labelBrief.Guid -ErrorAction Stop } catch { Write-Verbose "Failed to expand label $($labelBrief.Guid): $_"; $labelBrief } }
 	if ($expanded) { $labels = $expanded }
 	$output = foreach ($label in $labels) {
 		$contextId = $null; $contextName = $null
@@ -44,7 +44,7 @@ function Get-AuthContextLabels {
 								if ($protectionInfo.Id) { $contextId = $protectionInfo.Id }
 								if ($protectionInfo.DisplayName) { $contextName = $protectionInfo.DisplayName }
 							}
-							catch { }
+							catch { Write-Verbose "Failed to parse protectionlevel for label $($label.Guid): $_" }
 						}
 					}
 				}

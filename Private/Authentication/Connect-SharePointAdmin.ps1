@@ -44,7 +44,7 @@ function Connect-SharePointAdmin {
 			$connected = $true; $DataObject.IsSharePointConnected = $true
 			if (-not $QuietMode) { Write-Host '   ✓ SPO connected (interactive retry)' -ForegroundColor DarkGreen }
 		}
-		catch { $DataObject.ProcessingErrors.Add('Interactive retry failed: ' + $_.Exception.Message) }
+		catch { $DataObject.ProcessingErrors.Add('Interactive retry failed: ' + $_.Exception.Message); Write-Verbose ("SPO interactive retry failed: {0}" -f $_.Exception.Message) }
 	}
 	return $DataObject
 }
