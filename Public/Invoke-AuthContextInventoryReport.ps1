@@ -46,6 +46,12 @@ function Invoke-AuthContextInventoryReport {
 	.PARAMETER HtmlReportPath
 	Custom path for HTML report output. If not specified, uses OutputPath with auto-generated filename.
 
+	.PARAMETER TenantId
+	Tenant ID of the Entra ID tenant used for authentication. Required when using a custom app registration. 
+	
+	.PARAMETER ClientId
+	Application (Client) ID of the app registration used for authentication. Required when using a custom app registration. 
+	
 	.PARAMETER NoAutoOpen
 	Prevent automatic opening of the HTML report after generation.
 
@@ -94,11 +100,11 @@ function Invoke-AuthContextInventoryReport {
 	Uses specified UPN for authentication hints, custom output directory, and prevents automatic report opening.
 
 	.NOTES
-	Module:    M365IdentityPosture
-	Author:    Sebastian Flæng Markdanner
-	Website:   https://chanceofsecurity.com  
-	Version:   1.0.0
-	Date:      07-10-2025
+	Module:    		M365IdentityPosture
+	Author:    		Sebastian Flæng Markdanner
+	Website:   		https://chanceofsecurity.com  
+	Version:   		1.0.0
+	Creation Date:	07-10-2025
 	
 	All operations are read-only; no configuration changes performed.
 
