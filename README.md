@@ -94,7 +94,7 @@ Minimum permissions needed vary by report:
 - `EntitlementManagement.Read.All`
 - `Directory.Read.All` (for resolving directory objects)
 
-## � Installation
+## 📦 Installation
 
 ### Option 1: From PowerShell Gallery (Recommended)
 
