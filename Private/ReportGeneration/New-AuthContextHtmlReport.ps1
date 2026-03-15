@@ -189,7 +189,7 @@
 	<a href="https://github.com/Noble-Effeciency13/M365IdentityPosture" class="footer-link" target="_blank" rel="noopener">GitHub</a>
 	<span class="footer-separator">|</span>
 	<img src="$script:PSGalleryLogo" style="width:14px;height:14px;vertical-align:middle;" alt="PSGallery">
-	<a href="https://www.powershellgallery.com/packages/M365IdentityPosture/1.0.0" class="footer-link" target="_blank" rel="noopener">PSGallery</a>
+	<a href="https://www.powershellgallery.com/packages/M365IdentityPosture" class="footer-link" target="_blank" rel="noopener">PSGallery</a>
 	<span class="footer-separator">|</span>
 	<span class="footer-motto">For the community / By the community</span>
 	<span class="footer-separator">|</span>
