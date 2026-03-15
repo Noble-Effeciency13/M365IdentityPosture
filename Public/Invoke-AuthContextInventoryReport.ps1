@@ -175,6 +175,10 @@ function Invoke-AuthContextInventoryReport {
 		[Alias('HtmlPath')]
 		[ValidatePattern('\.html?$')]
 		[string]$HtmlReportPath,
+		[Parameter()]
+		[string]$TenantId,
+		[Parameter()]
+		[string]$ClientId,
 	
 		[Parameter()]
 		[Alias('DoNotOpen')]
@@ -239,6 +243,8 @@ function Invoke-AuthContextInventoryReport {
 		
 			# Add optional parameters only if provided
 			if ($TenantName) { $reportParams['TenantName'] = $TenantName }
+			if ($TenantId) { $reportParams['TenantId'] = $TenantId }
+			if ($ClientId) { $reportParams['ClientId'] = $ClientId }
 			if ($UserPrincipalName) { $reportParams['UserPrincipalName'] = $UserPrincipalName }
 			if ($SharePointOnlineCredential) { $reportParams['SharePointOnlineCredential'] = $SharePointOnlineCredential }
 			if ($HtmlReportPath) { $reportParams['HtmlReportPath'] = $HtmlReportPath }

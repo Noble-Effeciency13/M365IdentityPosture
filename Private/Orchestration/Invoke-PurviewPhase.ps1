@@ -79,6 +79,7 @@ function Invoke-PurviewPhase {
 			if (-not $QuietMode) { 
 				Write-Host '   ⚠ Label collection failed' -ForegroundColor DarkYellow 
 			}
+			else { Write-Verbose "Label collection failed: $_" }
 		}
 	}
 
@@ -87,14 +88,14 @@ function Invoke-PurviewPhase {
 		Disconnect-ExchangeOnline -Confirm:$false -ErrorAction SilentlyContinue | Out-Null 
 	} 
 	catch { 
-		# Silent failure
+		Write-Verbose "Failed to disconnect Exchange Online: $_"
 	}
 	
 	try { 
 		Remove-Module ExchangeOnlineManagement -Force -ErrorAction SilentlyContinue 
 	} 
 	catch { 
-		# Silent failure
+		Write-Verbose "Failed to remove ExchangeOnlineManagement module: $_"
 	}
 	
 	if (-not $QuietMode) { 

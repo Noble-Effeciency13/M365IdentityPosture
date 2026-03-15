@@ -33,7 +33,7 @@ function Resolve-DirectoryRoleName {
 		}
 	}
 	catch { 
-		# Silent failure - continue to next method
+		Write-Verbose "Failed to resolve role via templateId filter ${RoleId}: $($_)"
 	}
 	
 	# Fallback: roleDefinitions by id (some tenants surface guid as definition id)
@@ -45,7 +45,7 @@ function Resolve-DirectoryRoleName {
 		}
 	}
 	catch { 
-		# Silent failure - continue to next method
+		Write-Verbose "Failed to resolve role definition by id ${RoleId}: $($_)"
 	}
 	
 	# Fallback: directory role templates by id
@@ -57,7 +57,7 @@ function Resolve-DirectoryRoleName {
 		}
 	}
 	catch { 
-		# Silent failure - continue to next method
+		Write-Verbose "Failed to resolve directory role template ${RoleId}: $($_)"
 	}
 	
 	# Fallback: active directoryRoles by roleTemplateId
@@ -70,7 +70,7 @@ function Resolve-DirectoryRoleName {
 		}
 	}
 	catch { 
-		# Silent failure - return null
+		Write-Verbose "Failed to resolve active directory roles for template ${RoleId}: $($_)"
 	}
 	
 	return $null

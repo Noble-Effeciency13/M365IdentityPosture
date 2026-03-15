@@ -77,6 +77,7 @@ function Invoke-SharePointPhase {
 					if (-not $QuietMode) { 
 						Write-Host '   ⚠ Site enumeration failed' -ForegroundColor DarkYellow 
 					} 
+					else { Write-Verbose "Site enumeration failed: $_" }
 				}
 			}
 			else { 
@@ -94,14 +95,14 @@ function Invoke-SharePointPhase {
 			} 
 		} 
 		catch { 
-			# Silent failure
+			Write-Verbose "Failed to disconnect SPO Service: $_"
 		}
 		
 		try { 
 			Remove-Module Microsoft.Online.SharePoint.PowerShell -Force -ErrorAction SilentlyContinue 
 		} 
 		catch { 
-			# Silent failure
+			Write-Verbose "Failed to remove SharePoint module: $_"
 		}
 		
 		if (-not $QuietMode) { 

@@ -7,19 +7,21 @@
 .DESCRIPTION
     Comprehensive identity and access security reporting framework for Microsoft 
     cloud services. Provides assessment tools for Authentication Context, Access 
-    Packages, Role Assignments, Conditional Access, and related security 
-    configurations across Microsoft 365, Azure AD/Entra ID, and hybrid scenarios.
+    Package documentation with interactive visualization, Role Assignments, 
+    Conditional Access policies, and related security configurations across 
+    Microsoft 365, Azure AD/Entra ID, and hybrid scenarios.
 .NOTES
     Module Name: M365IdentityPosture
     Author: Sebastian Flæng Markdanner
     Website: https://chanceofsecurity.com
-    Version: 1.0.0
+    GitHub: https://github.com/Noble-Effeciency13/M365IdentityPosture
+    Version: 1.1.0
 #>
 
 # Module configuration
 $script:ModuleRoot = $PSScriptRoot
 $script:ModuleName = 'M365IdentityPosture'
-$script:ModuleVersion = '1.0.0'
+$script:ModuleVersion = '1.1.0'
 $script:ToolVersion = $script:ModuleVersion
 
 # Initialize module-scoped variables
@@ -37,103 +39,13 @@ $script:AllSensitivityLabels = $null
 # Role name cache for performance optimization
 $script:__AuthContext_RoleNameCache = @{}
 
-# Internal logging function (define before using)
-function Write-ModuleLog {
-	param(
-		[Parameter(Mandatory)]
-		[string]$Message,
-        
-		[ValidateSet('Info', 'Warning', 'Error', 'Debug', 'Verbose', 'Success')]
-		[string]$Level = 'Info',
-        
-		[switch]$NoConsole
-	)
-    
-	$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss.fff'
-	$logEntry = "$timestamp [$Level] $Message"
-    
-	# Write to log file
-	try {
-		if ($script:LogPath) {
-			Add-Content -Path $script:LogPath -Value $logEntry -ErrorAction SilentlyContinue
-		}
-	}
-	catch {
-		# Silently continue if log write fails
-	}
-    
-	# Write to appropriate stream unless suppressed
-	if (-not $NoConsole) {
-		switch ($Level) {
-			'Warning' { Write-Warning $Message }
-			'Error' { Write-Error $Message }
-			'Debug' { Write-Debug $Message }
-			'Verbose' { Write-Verbose $Message }
-			'Success' { Write-Host $Message -ForegroundColor Green }
-			default { Write-Information $Message -InformationAction Continue }
-		}
-	}
+# Load core internal functions early (logging + banner) so they are available during module initialization.
+try {
+	. (Join-Path -Path $PSScriptRoot -ChildPath 'Private\Utilities\Write-ModuleLog.ps1')
+	. (Join-Path -Path $PSScriptRoot -ChildPath 'Private\Utilities\Show-ModuleBanner.ps1')
 }
-
-# Dynamic banner display helper (internal)
-function Show-ModuleBanner {
-	param(
-		[int]$MinWidth = 65,
-		[switch]$Force,
-		[switch]$NoCommands
-	)
-
-	if (-not $Force) {
-		if ($env:M365IdentityPosture_QUIET -or $Host.Name -ne 'ConsoleHost') { return }
-	}
-
-	try {
-		$primaryLines = @(
-			"M365 Identity & Security Posture v$script:ModuleVersion",
-			'Identity, Access & Security Reporting for Microsoft Cloud'
-		)
-		$infoLines = @(
-			'Author: Sebastian Flæng Markdanner',
-			'Website: https://chanceofsecurity.com'
-		)
-
-		$maxLen = @($primaryLines + $infoLines | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum
-		$innerWidth = [Math]::Max($MinWidth, $maxLen)
-
-		$top = '╔' + ('═' * ($innerWidth + 2)) + '╗'
-		$midSep = '╠' + ('═' * ($innerWidth + 2)) + '╣'
-		$bottom = '╚' + ('═' * ($innerWidth + 2)) + '╝'
-
-		Write-Host ''
-		Write-Host $top -ForegroundColor Cyan
-		foreach ($l in $primaryLines) {
-			$padTotal = $innerWidth - $l.Length
-			$leftPad = [int][Math]::Floor($padTotal / 2)
-			$rightPad = $padTotal - $leftPad
-			Write-Host ('║ ' + (' ' * $leftPad) + $l + (' ' * $rightPad) + ' ║') -ForegroundColor Cyan
-		}
-		Write-Host $midSep -ForegroundColor Cyan
-		foreach ($l in $infoLines) {
-			$padTotal = $innerWidth - $l.Length
-			$leftPad = [int][Math]::Floor($padTotal / 2)
-			$rightPad = $padTotal - $leftPad
-			Write-Host ('║ ' + (' ' * $leftPad) + $l + (' ' * $rightPad) + ' ║') -ForegroundColor DarkGray
-		}
-		Write-Host $bottom -ForegroundColor Cyan
-		Write-Host ''
-
-		if (-not $NoCommands) {
-			Write-Host 'Available Commands:' -ForegroundColor Yellow
-			Write-Host '  • Invoke-AuthContextInventoryReport' -ForegroundColor Green
-			Write-Host ''
-			Write-Host 'For help, run: ' -NoNewline -ForegroundColor DarkGray
-			Write-Host 'Get-Help Invoke-AuthContextInventoryReport -Detailed' -ForegroundColor White
-			Write-Host ''
-		}
-	}
-	catch {
-		Write-Host 'M365 Reporting Framework loaded.' -ForegroundColor Cyan
-	}
+catch {
+	throw "Failed to load core module utilities (Write-ModuleLog/Show-ModuleBanner): $($_.Exception.Message)"
 }
 
 # Initialize module logging
@@ -149,6 +61,13 @@ $privateRoot = Join-Path $PSScriptRoot 'Private'
 $Private = @()
 if (Test-Path $privateRoot) {
 	$Private = Get-ChildItem -Path $privateRoot -Filter '*.ps1' -Recurse -File -ErrorAction SilentlyContinue | Sort-Object FullName
+	# These are loaded explicitly above (needed early in module initialization).
+	$Private = @(
+		$Private | Where-Object {
+			$_.FullName -notlike '*\Private\Utilities\Write-ModuleLog.ps1' -and
+			$_.FullName -notlike '*\Private\Utilities\Show-ModuleBanner.ps1'
+		}
+	)
 	# Group for logging by relative folder
 	$grouped = $Private | Group-Object { Split-Path $_.FullName -Parent }
 	foreach ($g in $grouped) {
@@ -218,8 +137,12 @@ if ($Host.Name -eq 'ConsoleHost' -and -not $env:M365IdentityPosture_QUIET) {
 		$_.InvocationInfo.MyCommand.Module.Name -eq $script:ModuleName 
 	}
     
-	# Only show banner on initial import, not during function execution
+	# Only show banner and version check on initial import, not during function execution
 	if (-not $isInternalCall) {
+		# Check for module updates (silent if PSGallery unavailable)
+		Test-ModuleVersion
+		
+		# Display module banner
 		Show-ModuleBanner -MinWidth 67
 	}
 }
@@ -235,7 +158,7 @@ $OnRemoveScript = {
 			Disconnect-MgGraph -ErrorAction SilentlyContinue | Out-Null
 		}
 		catch {
-			# Silently continue
+			Write-Verbose "Failed to disconnect from Microsoft Graph: $_"
 		}
 	}
     
@@ -246,7 +169,7 @@ $OnRemoveScript = {
 			Disconnect-SPOService -ErrorAction SilentlyContinue | Out-Null
 		}
 		catch {
-			# Silently continue
+			Write-Verbose "Failed to disconnect from SharePoint Online: $_"
 		}
 	}
     
@@ -257,7 +180,7 @@ $OnRemoveScript = {
 			Disconnect-ExchangeOnline -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
 		}
 		catch {
-			# Silently continue
+			Write-Verbose "Failed to disconnect from Exchange Online: $_"
 		}
 	}
     
@@ -269,7 +192,7 @@ $OnRemoveScript = {
 			Disconnect-AzAccount -ErrorAction SilentlyContinue | Out-Null
 		}
 		catch {
-			# Silently continue
+			Write-Verbose "Failed to disconnect from Azure: $_"
 		}
 	}
     

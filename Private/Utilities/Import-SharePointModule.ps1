@@ -20,11 +20,11 @@ function Import-SharePointModule {
 	$spoModuleAvailable = (Get-Module -ListAvailable -Name Microsoft.Online.SharePoint.PowerShell)
 	if (-not $spoModuleAvailable) { return $false }
 	try {
-		Invoke-ModuleOperation -Name Microsoft.Online.SharePoint.PowerShell -Operation Import -WinPSCompat | Out-Null
+		Invoke-ModuleOperation -Name Microsoft.Online.SharePoint.PowerShell -Operation Import -WinPSCompat -QuietMode:$QuietMode | Out-Null
 		return $true
 	}
 	catch {
-		if (-not $QuietMode) { Write-Host ('   ✗ SPO module import failed: {0}' -f $_.Exception.Message) -ForegroundColor Red }
+		if (-not $QuietMode) { Write-Host ('   ✗ SPO module import failed: {0}' -f $_.Exception.Message) -ForegroundColor Red } else { Write-Verbose ('SPO module import failed: {0}' -f $_.Exception.Message) }
 		return $false
 	}
 }

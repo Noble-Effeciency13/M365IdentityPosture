@@ -36,8 +36,9 @@ function Get-GroupPIMPoliciesFiltered {
 			catch {
 				if ($_.Exception.Message -match 'BadRequest' -or $_.Exception.Message -match '403') {
 					$aUri = $aUri -replace '/v1.0/', '/beta/'
-					try { $ar = Invoke-MgGraphRequest -Uri $aUri -Method GET -ErrorAction Stop; if ($ar.value) { $assignments = $ar.value } } catch { }
+					try { $ar = Invoke-MgGraphRequest -Uri $aUri -Method GET -ErrorAction Stop; if ($ar.value) { $assignments = $ar.value } } catch { Write-Verbose "Failed to retrieve group PIM assignments for ${groupId}: $($_)" }
 				}
+				else { Write-Verbose "Failed to retrieve group PIM assignments for ${groupId}: $($_)" }
 			}
 			if (-not $assignments -or $assignments.Count -eq 0) { continue }
 			foreach ($assignmentItem in $assignments) {
@@ -47,8 +48,9 @@ function Get-GroupPIMPoliciesFiltered {
 				try { $policyFull = Invoke-MgGraphRequest -Uri $policyUri -Method GET -ErrorAction Stop } catch {
 					if ($_.Exception.Message -match 'BadRequest' -or $_.Exception.Message -match '403') {
 						$policyUri = $policyUri -replace '/v1.0/', '/beta/'
-						try { $policyFull = Invoke-MgGraphRequest -Uri $policyUri -Method GET -ErrorAction Stop } catch { $policyFull = $null }
+						try { $policyFull = Invoke-MgGraphRequest -Uri $policyUri -Method GET -ErrorAction Stop } catch { Write-Verbose "Failed to retrieve group PIM policy $($assignmentItem.policyId) via beta: $($_)"; $policyFull = $null }
 					}
+					else { Write-Verbose "Failed to retrieve group PIM policy $($assignmentItem.policyId): $($_)" }
 				}
 				if ($policyFull) {
 					if ($assignmentItem.roleDefinitionId) { $policyFull | Add-Member -NotePropertyName RoleDefinitionId -NotePropertyValue $assignmentItem.roleDefinitionId -Force }

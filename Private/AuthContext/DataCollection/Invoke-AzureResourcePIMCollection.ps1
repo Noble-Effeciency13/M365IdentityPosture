@@ -33,6 +33,7 @@ function Invoke-AzureResourcePIMCollection {
 		[string[]] $AzureSubscriptionIds,
 		[switch] $Quiet
 	)
+	$null = $Quiet
 
 	if ($TenantId) { [Environment]::SetEnvironmentVariable('AZURE_TENANT_ID', $TenantId, 'Process') }
 

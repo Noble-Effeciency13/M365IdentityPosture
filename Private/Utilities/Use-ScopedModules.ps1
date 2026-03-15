@@ -44,7 +44,7 @@ function Use-ScopedModules {
 	}
 	try { & $Action } finally {
 		foreach ($moduleName in $imported) {
-			try { Remove-Module $moduleName -Force -ErrorAction SilentlyContinue } catch { }
+			try { Remove-Module $moduleName -Force -ErrorAction SilentlyContinue } catch { Write-Verbose ("Failed to remove module {0}: {1}" -f $moduleName, $_.Exception.Message) }
 			if (-not $QuietMode) { Write-Host ('[Scoped] Removed {0}' -f $moduleName) -ForegroundColor DarkGray }
 		}
 	}

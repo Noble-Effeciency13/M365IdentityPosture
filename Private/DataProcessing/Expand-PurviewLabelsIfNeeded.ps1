@@ -26,7 +26,7 @@ function Expand-PurviewLabelsIfNeeded {
 	$labelsRaw = $Labels
 	if ($labelsRaw.Count -eq 0) { return $labelsRaw }
 	$labelExpansionLimit = 50
-	if ($env:AUTHContext_LABEL_EXPANSION_LIMIT) { try { $labelExpansionLimit = [int]$env:AUTHContext_LABEL_EXPANSION_LIMIT } catch {} }
+	if ($env:AUTHContext_LABEL_EXPANSION_LIMIT) { try { $labelExpansionLimit = [int]$env:AUTHContext_LABEL_EXPANSION_LIMIT } catch { Write-Verbose 'Failed to parse AUTHContext_LABEL_EXPANSION_LIMIT; using default.' } }
 	if ($labelsRaw.Count -gt $labelExpansionLimit) {
 		if (-not $QuietMode) { Write-Host ('   → Skipping individual label expansion (too many labels: {0} > {1})' -f $labelsRaw.Count, $labelExpansionLimit) -ForegroundColor DarkYellow }
 		if (-not $QuietMode) { Write-Host '   → Set AUTHContext_LABEL_EXPANSION_LIMIT environment variable to override' -ForegroundColor DarkGray }
@@ -43,10 +43,10 @@ function Expand-PurviewLabelsIfNeeded {
 		}
 		try {
 			if (-not $labelBrief.LabelActions -and -not $labelBrief.SiteAndGroupSettings) {
+				$Guid = $labelBrief.Guid
 				$labelJob = Start-Job -ScriptBlock {
-					param($Guid)
-					try { Get-Label -Identity $Guid -ErrorAction Stop } catch { $null }
-				} -ArgumentList $labelBrief.Guid
+					try { Get-Label -Identity $using:Guid -ErrorAction Stop } catch { $null }
+				}
 				if (Wait-Job -Job $labelJob -Timeout $maxLabelExpansionTime) {
 					$detailedLabel = Receive-Job -Job $labelJob
 					if ($detailedLabel) { $expandedLabels.Add($detailedLabel) } else { $expandedLabels.Add($labelBrief) }
@@ -60,7 +60,10 @@ function Expand-PurviewLabelsIfNeeded {
 			}
 			else { $expandedLabels.Add($labelBrief) }
 		}
-		catch { $expandedLabels.Add($labelBrief) }
+		catch {
+			Write-Verbose ("Failed to expand label {0}: {1}" -f $labelBrief.DisplayName, $_.Exception.Message)
+			$expandedLabels.Add($labelBrief)
+		}
 	}
 	if (-not $NoProgress -and $labelsRaw.Count -gt 5) { Write-Progress -Id 99 -Activity 'Processing Sensitivity Labels' -Completed }
 	if ($skippedSlowLabels -gt 0 -and -not $QuietMode) { Write-Host ('   → Completed label processing ({0} labels processed, {1} timeouts)' -f $expandedLabels.Count, $skippedSlowLabels) -ForegroundColor DarkCyan }

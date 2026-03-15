@@ -32,6 +32,7 @@ function Get-PIMManagedGroupsResources {
 	}
 	catch {
 		if (-not $Quiet) { Write-Host ('      ⚠ Managed group resource call failed: {0}' -f $_.Exception.Message) -ForegroundColor DarkYellow }
+		else { Write-Verbose ('Managed group resource call failed: {0}' -f $_.Exception.Message) }
 	}
 	if (-not $result) { return @() }
 	return $result | ForEach-Object {

@@ -25,8 +25,8 @@ function Finalize-AzurePhase {
 	)
 	$forceDisc = $env:AUTHContext_AZURE_DISCONNECT
 	if ($forceDisc -and $forceDisc -in @('1', 'true', 'yes')) {
-		try { if ($DataObject.IsAzureConnected) { Disconnect-AzAccount -ErrorAction SilentlyContinue | Out-Null } } catch {}
-		try { Remove-Module Az.Accounts -Force -ErrorAction SilentlyContinue } catch {}
+		try { if ($DataObject.IsAzureConnected) { Disconnect-AzAccount -ErrorAction SilentlyContinue | Out-Null } } catch { Write-Verbose "Failed to disconnect AzAccount: $_" }
+		try { Remove-Module Az.Accounts -Force -ErrorAction SilentlyContinue } catch { Write-Verbose "Failed to remove Az.Accounts module: $_" }
 		if (-not $QuietMode) { Write-Host '[Azure] Phase complete (disconnected by policy)' -ForegroundColor DarkGray }
 	}
 	else {

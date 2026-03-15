@@ -3,95 +3,42 @@
 A comprehensive PowerShell module for security posture assessment and identity governance reporting across Microsoft 365, Azure, and hybrid environments.
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.0%2B-blue.svg)
-![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/M365IdentityPosture?label=PSGallery%20Downloads&color=orange)
 ![PSGallery Version](https://img.shields.io/powershellgallery/v/M365IdentityPosture?label=PSGallery%20Version)
+![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/M365IdentityPosture?label=PSGallery%20Downloads&color=orange)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+## 📑 Table of Contents
+
+- [Overview](#-overview)
+- [What's Included](#-whats-included)
+- [Installation](#-installation)
+- [Prerequisites](#-prerequisites)
+- [Reports](#-reports)
+  - [Authentication Context Inventory](#-authentication-context-inventory)
+  - [Access Package Documentor](#-access-package-documentor)
+- [Common Features](#-common-features)
+- [Use Cases](#-use-cases)
+- [Module Architecture](#️-module-architecture)
+- [Troubleshooting](#-troubleshooting)
+- [Roadmap](#-roadmap--future-reports)
+- [Contributing](#-contributing)
+- [Author & Contributors](#-author---contributors)
+- [Changelog](#-changelog)
+- [Support](#-support)
 
 ## 🎯 Overview
 
-M365IdentityPosture is a comprehensive PowerShell module for security posture assessment and identity governance reporting across Microsoft 365, Azure AD/Entra ID, and hybrid environments. While the initial release focuses on Authentication Context inventory, the framework is designed to expand into comprehensive identity and security analytics.
+M365IdentityPosture is an extensible PowerShell framework for security posture assessment and identity governance reporting across Microsoft 365, Azure AD/Entra ID, and hybrid environments. Built with a modular architecture, the framework provides specialized reports for different identity and access management scenarios, with each report generating interactive HTML output featuring runtime theme switching and comprehensive data visualization.
 
-### Current Capabilities (v1.0)
-- **Authentication Context Inventory**: Complete analysis of authentication context usage across Microsoft 365 services
-- **Cross-Service Correlation**: Maps authentication requirements across Purview, Conditional Access, PIM, SharePoint, and Teams
-- **Security Gap Identification**: Identifies unused or misconfigured authentication contexts
+## 🎁 What's Included
 
-### 🚀 Roadmap
-- **Access Package Analytics**: Entitlement management and access review reporting
-- **Role Assignment Auditing**: Comprehensive RBAC and privileged role analysis
-- **Conditional Access Gap Analysis**: Policy coverage and security gap identification
-- **Identity Protection Insights**: Risk-based access and identity security metrics
-- **Governance Workflows**: Automated compliance and attestation reporting
-- **Enhanced reporting capabilities**: Multiple export options for further analysis, Dashboards with KPIs and Trends
+The module currently includes two comprehensive reports:
 
-## ✨ Key Features
+- **🔐 Authentication Context Inventory**: Maps authentication context requirements and enforcement across Microsoft 365 services including Purview, Conditional Access, PIM, SharePoint, and Teams. Identifies security gaps and configuration issues.
 
-### 📊 Comprehensive Service Coverage
+- **📦 Access Package Documentor**: Interactive graph-based visualization and documentation of Entitlement Management. Features Cytoscape.js graph visualization with filtering, search, zoom/pan controls, and multi-format export (PNG, Markdown, JSON). *Co-developed with Christian Frohn*.
 
-- **📋 Purview Sensitivity Labels**
-  - Discovers labels with embedded Authentication Context requirements
-  - Maps label inheritance to groups and sites
-  - Tracks label application across services
-  
-- **🔒 Conditional Access Policies**
-  - Maps policies referencing Authentication Contexts
-  - Identifies target users, groups, and applications
-  - Analyzes policy effectiveness and gaps
-  
-- **👥 Privileged Identity Management (PIM)**
-  - Directory role management policies
-  - Group-based PIM policies with role assignments
-  - Azure resource PIM policies (optional)
-  - Just-in-time access configuration analysis
-  
-- **📁 SharePoint Online**
-  - Direct Authentication Context assignments on sites
-  - Inherited context through sensitivity labels
-  - Site-level security posture assessment
-  
-- **👥 Microsoft 365 Groups & Teams**
-  - Label inheritance tracking
-  - Context enforcement analysis
-  - Team and channel security configuration
-  
-- **🛡️ Protected Actions**
-  - RBAC resource actions with context requirements
-  - Cross-service authentication context mapping
-  - Critical operation protection analysis
-
-### 📈 Reporting Capabilities
-
-- **Interactive HTML Reports** with rich formatting and data visualization
-- **Cross-Reference Analysis** between all services
-- **Detailed Inventory Tables** with filtering and sorting
-- **Executive Summaries** for leadership reporting
-
-## 💡 Use Cases
-
-### Security Auditing
-- Quarterly security posture assessments
-- Compliance reporting for authentication standards
-- Pre/post implementation validation
-- Zero Trust maturity assessment
-
-### Identity Governance
-- Access review preparation
-- Privileged role inventory
-- Entitlement management optimization
-- Lifecycle management analysis
-
-### Migration Planning
-- Zero Trust readiness assessment
-- Authentication method modernization
-- Legacy access identification
-- Cloud security baseline establishment
-
-### Compliance & Risk Management
-- Regulatory compliance validation
-- Risk assessment documentation
-- Security control effectiveness measurement
-- Audit evidence collection
+Both reports generate interactive HTML with runtime theme switching (Classic/Light and Dark) and are designed for security auditors, compliance teams, and identity governance professionals.
 
 ## 📋 Prerequisites
 
@@ -105,13 +52,17 @@ M365IdentityPosture is a comprehensive PowerShell module for security posture as
 This module **dynamically loads and unloads** its dependencies as needed for each reporting phase. You do **not** need to import all modules up front. The following modules are required and will be loaded automatically when needed:
 
 ```powershell
-# Core modules (always required for at least one phase)
+# Authentication Context Inventory dependencies
 Microsoft.Graph.Authentication
 Microsoft.Graph.Groups
 ExchangeOnlineManagement
 Microsoft.Online.SharePoint.PowerShell
 
-# Azure modules (only if Azure PIM reporting is enabled)
+# Access Package Documentor dependencies
+Microsoft.Graph.Authentication
+Microsoft.Graph.Identity.Governance
+
+# Azure modules (only if Azure PIM reporting is enabled in AuthContext)
 Az.Accounts
 Az.Resources
 ```
@@ -120,9 +71,10 @@ Az.Resources
 
 ### Required Permissions
 
-Minimum permissions needed for full functionality:
+Minimum permissions needed vary by report:
 
-#### Microsoft Graph API
+#### Authentication Context Inventory Report
+**Microsoft Graph API:**
 - `Directory.Read.All`
 - `Group.Read.All`
 - `Policy.Read.All`
@@ -132,12 +84,17 @@ Minimum permissions needed for full functionality:
 - `PrivilegedAccess.Read.AzureADGroup`
 - `InformationProtectionPolicy.Read.All`
 
-#### Service-Specific Roles
+**Service-Specific Roles:**
 - **Exchange Online**: View-Only Organization Management
 - **SharePoint Online**: SharePoint Administrator or Global Reader
 - **Azure**: Reader role on subscriptions (for Azure PIM enumeration)
 
-## 📦 Installation
+#### Access Package Documentor Report
+**Microsoft Graph API:**
+- `EntitlementManagement.Read.All`
+- `Directory.Read.All` (for resolving directory objects)
+
+## � Installation
 
 ### Option 1: From PowerShell Gallery (Recommended)
 
@@ -174,77 +131,150 @@ Copy-Item -Path ".\M365IdentityPosture\*" -Destination $modulePath -Recurse -For
 Import-Module M365IdentityPosture
 ```
 
-## 🚀 Usage
+## 📊 Reports
 
-### Quick Start
+### 🔐 Authentication Context Inventory
+
+**Purpose**: Comprehensive discovery and analysis of authentication context enforcement across Microsoft 365 services, providing visibility into where and how authentication requirements are applied throughout your tenant.
+
+**When to Use**:
+- Security posture assessments and Zero Trust maturity evaluation
+- Compliance audits requiring authentication requirements documentation
+- Gap analysis of authentication context enforcement
+- Pre/post implementation validation of authentication policies
+
+**Quick Start**:
 
 ```powershell
 # Import the module
 Import-Module M365IdentityPosture
 
-# Run the authentication context inventory report
+# Basic usage - discovers all authentication contexts across services
 Invoke-AuthContextInventoryReport
-```
 
-### Detailed Examples
+# Exclude Azure PIM enumeration for faster execution
+Invoke-AuthContextInventoryReport -ExcludeAzure
 
-#### Standard Full Inventory
-
-```powershell
-# Full inventory with all services
-Invoke-AuthContextInventoryReport ´
-    -TenantName "contoso" ´
-    -OutputPath "C:\Reports\AuthContext" ´
-    -UserPrincipalName "admin@contoso.com"
-```
-
-#### Quiet Mode with Custom Output
-
-```powershell
-# Run quietly with custom HTML path
-Invoke-AuthContextInventoryReport ´
-    -TenantName "contoso" ´
-    -HtmlReportPath "D:\Security\AuthContext_$(Get-Date -Format 'yyyyMMdd').html" ´
-    -Quiet ´
+# Custom output path with quiet mode
+Invoke-AuthContextInventoryReport `
+    -TenantName "contoso" `
+    -OutputPath "C:\Reports\AuthContext" `
+    -Quiet `
     -NoAutoOpen
 ```
 
-#### Exclude Azure PIM Enumeration
+**Key Capabilities**:
+- **Purview Sensitivity Labels**: Discovers labels with embedded authentication context requirements and tracks label inheritance
+- **Conditional Access Policies**: Maps policies referencing authentication contexts with target users, groups, and applications
+- **Privileged Identity Management (PIM)**: Analyzes directory role policies, group-based PIM, and Azure resource PIM policies (optional)
+- **SharePoint Online**: Identifies direct authentication context assignments and inherited contexts through labels
+- **Microsoft 365 Groups & Teams**: Tracks label inheritance and context enforcement across teams and channels
+- **Protected Actions**: Maps RBAC resource actions requiring authentication contexts
+- **Cross-Service Correlation**: Identifies relationships and dependencies between services
+- **Gap Identification**: Highlights unused or misconfigured authentication contexts
 
+**Parameters**: For complete parameter documentation and advanced examples, run:
 ```powershell
-# Skip Azure resource PIM enumeration (faster)
-Invoke-AuthContextInventoryReport ´
-    -TenantName "contoso" ´
-    -ExcludeAzure
+Get-Help Invoke-AuthContextInventoryReport -Full
 ```
 
-#### Target Specific Azure Subscriptions
+---
+
+### 📦 Access Package Documentor
+
+**Purpose**: Interactive graph-based visualization and comprehensive documentation of Entitlement Management configurations, providing clear visibility into access package structures, policies, workflows, and resource assignments.
+
+**When to Use**:
+- Access review preparation and delegation audits
+- Onboarding/offboarding process documentation
+- Entitlement management optimization and cleanup
+- Compliance reporting for access governance
+
+**Quick Start**:
 
 ```powershell
-# Process only specific Azure subscriptions
-$subscriptions = @(
-    'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-    'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy'
-)
+# Import the module
+Import-Module M365IdentityPosture
 
-Invoke-AuthContextInventoryReport ´
-    -TenantName "contoso" ´
-    -AzureSubscriptionIds $subscriptions
+# Basic usage - documents all access packages and catalogs
+Invoke-AccessPackageDocumentor -OutputPath "C:\Reports\AccessPackages"
+
+# Use dark theme
+Invoke-AccessPackageDocumentor `
+    -OutputPath "C:\Reports" `
+    -Theme Dark
+
+# Quiet mode without auto-opening the report
+Invoke-AccessPackageDocumentor `
+    -OutputPath "C:\Reports" `
+    -Quiet `
+    -NoAutoOpen
 ```
 
-### Parameters Reference
+**Key Capabilities**:
+- **Access Package Structure**: Complete inventory of access packages, catalogs, and assignment policies
+- **Resource Assignments**: Maps resource role scopes including groups applications, SharePoint sites, and Teams
+- **Approval Workflows**: Documents multi-stage approval processes with approvers and escalation settings
+- **Policy Configurations**: Captures expiration settings, access reviews, requestor questions, and custom extensions
+- **Verified ID Integration**: Shows Verified ID requirements in policies when configured
+- **Interactive Cytoscape.js Graph**: 
+  - Zoom, pan, and drag-to-explore visualizations
+  - Filter by catalog, access package, policy, or resource type
+  - Full-text search across all node labels
+  - Click nodes to view detailed information in side panel
+  - Layout optimization for different graph sizes
+- **Multi-Format Export**:
+  - **PNG/JPEG**: High-resolution graph screenshots
+  - **Markdown**: Hierarchical documentation with all details
+  - **JSON**: Structured data for external processing or integration
 
-| Parameter | Type | Description | Default |
-|-----------|------|-------------|---------|
-| **-TenantName** | String | SharePoint tenant name (e.g., 'contoso' for contoso.sharepoint.com) | Auto-detected from current context |
-| **-OutputPath** | String | Directory path for report output files | `C:\Reports\M365AuthContext` |
-| **-UserPrincipalName** | String | UPN for authentication hints | Current user's UPN |
-| **-Quiet** | Switch | Suppresses non-essential console output | `$false` |
-| **-NoProgress** | Switch | Suppresses progress bars during execution | `$false` |
-| **-HtmlReportPath** | String | Custom path for HTML report output | Auto-generated with timestamp |
-| **-NoAutoOpen** | Switch | Prevents automatic opening of HTML report | `$false` |
-| **-ExcludeAzure** | Switch | Skips Azure resource PIM enumeration | `$false` |
-| **-AzureSubscriptionIds** | String[] | Specific Azure subscription IDs to process | All accessible subscriptions |
+**Parameters**: For complete parameter documentation and advanced examples, run:
+```powershell
+Get-Help Invoke-AccessPackageDocumentor -Full
+```
+
+*This report was co-developed with [Christian Frohn](https://github.com/ChrFrohn).*
+
+---
+
+## ✨ Common Features
+
+All reports in the M365IdentityPosture module share these capabilities:
+
+### Runtime Theme Switching
+Both reports generate HTML with two built-in themes:
+- **Classic (Light)**: Default professional appearance with high contrast
+- **Dark**: Reduced eye strain for extended viewing sessions
+
+Reports include a theme toggle button for instant switching without regenerating the report.
+
+### Dynamic Module Loading
+The module automatically loads required PowerShell modules on-demand for each phase and unloads them afterward to free memory. No need to pre-import dependencies.
+
+### Comprehensive Logging
+Detailed execution logs are automatically generated in your temp directory with timestamps:
+- **Windows**: `%TEMP%\M365IdentityPosture_YYYYMMDD_HHMMSS.log`
+- **Linux/macOS**: `/tmp/M365IdentityPosture_YYYYMMDD_HHMMSS.log`
+
+### Read-Only Operations
+All reports perform read-only operations with no tenant modifications, making them safe to run in production environments.
+
+### Progress Reporting
+Visual progress indicators and status messages keep you informed during long-running operations across multiple services.
+
+## 💡 Use Cases
+
+The M365IdentityPosture module addresses key identity and access management scenarios:
+
+- **Security Posture Assessment**: Quarterly evaluations and Zero Trust maturity benchmarking
+- **Compliance Auditing**: Authentication requirements documentation and regulatory validation
+- **Access Governance**: Access review preparation and entitlement management optimization
+- **Identity Lifecycle Management**: Onboarding/offboarding process documentation and validation
+- **Gap Analysis**: Identify security gaps, misconfigurations, and unused resources
+- **Migration Planning**: Zero Trust readiness assessment and authentication modernization
+- **Audit Evidence**: Generate compliance documentation and security control effectiveness reports
+
+Both reports complement each other: use **Authentication Context Inventory** for security policy enforcement analysis, and **Access Package Documentor** for access governance and delegation workflows.
 
 ## 🏗️ Module Architecture
 
@@ -253,9 +283,7 @@ Invoke-AuthContextInventoryReport ´
     ├── M365IdentityPosture.psm1       # Root module with banner
     ├── Public/                         # Exported functions
     │   ├── Invoke-AuthContextInventoryReport.ps1
-    │   ├── (Future) Invoke-AccessPackageReport.ps1
-    │   ├── (Future) Invoke-RoleAssignmentAudit.ps1
-    │   └── (Future) Invoke-CAGapAnalysis.ps1
+    │   └── Invoke-AccessPackageDocumentor.ps1
     ├── Private/                        # Internal functions (organized by domain)
     │   ├── AuthContext/               # Authentication context specific
     │   ├── Authentication/            # Service connections
@@ -267,78 +295,11 @@ Invoke-AuthContextInventoryReport ´
     └── Tests/                         # Pester tests and validation
 
 
-## 📊 Report Output
+## 🔍 Troubleshooting
 
-### HTML Report Structure
+### Common Issues and Solutions
 
-The generated HTML report includes a flexible layout system with runtime theme switching:
-
-#### Executive Summary Dashboard
-- Total Authentication Contexts defined
-- Active vs. Inactive contexts
-- Service coverage metrics
-- Security posture indicators
-- Risk assessment scores
-
-#### Detailed Inventory Sections
-
-1. **Authentication Contexts**
-   - All defined contexts with status and configuration
-   - Usage statistics across services
-   - Orphaned or unused contexts
-   
-2. **Sensitivity Labels**
-   - Labels enforcing authentication contexts
-   - Label hierarchy and inheritance
-   - Application coverage metrics
-   
-3. **SharePoint Sites**
-   - Direct context assignments
-   - Inherited contexts via labels
-   - Site security posture scoring
-   
-4. **Microsoft 365 Groups/Teams**
-   - Groups with context-enforcing labels
-   - Teams channel inheritance
-   - Guest access implications
-   
-5. **Conditional Access Policies**
-   - Policies referencing authentication contexts
-   - Target users, groups, and applications
-   - Policy effectiveness analysis
-   
-6. **Protected Actions**
-   - RBAC actions requiring contexts
-   - Service-specific protections
-   - Critical operation coverage
-   
-7. **PIM Policies**
-   - Directory role policies with contexts
-   - Group-based PIM configurations
-   - Azure resource PIM policies
-   - Just-in-time access patterns
-
-### Themes & Runtime Toggle
-
-Two base themes with instant runtime switching:
-- **Classic** (light theme) - Default professional appearance
-- **Dark** (dark theme) - Reduced eye strain for extended viewing
-
-Reports include a theme toggle button for instant switching without regeneration.
-
-## 🚀 Roadmap & Future Reports
-
-The M365IdentityPosture module is actively expanding to include:
-
-### Access Governance
-- **Access Package Reports**
-  - Access package utilization metrics
-  - Assignment lifecycle analytics
-  - Approval workflow analysis
-  - Expiration and recertification tracking
-
-### Privileged Access
-- **Role Assignment Reports**
+#### PowerShell Version Issues
   - Privileged role usage patterns
   - Role activation history
   - Standing vs eligible assignments
@@ -446,6 +407,43 @@ $DebugPreference = 'Continue'
 Invoke-AuthContextInventoryReport -TenantName "contoso"
 ```
 
+## 🚀 Roadmap & Future Reports
+
+The M365IdentityPosture module continues to expand with additional identity and access management reports:
+
+### Planned Reports
+
+- **Role Assignment Auditing**
+  - Privileged role usage patterns and activation history
+  - Standing vs eligible assignments analysis
+  - Separation of duties validation
+  - Role mining and optimization recommendations
+
+- **Conditional Access Gap Analysis**
+  - Uncovered users and applications identification
+  - Policy overlap and conflict detection
+  - MFA and device compliance gap analysis
+  - Sign-in risk coverage evaluation
+  - Location-based access pattern analysis
+
+- **Identity Protection Dashboard**
+  - Security defaults effectiveness assessment
+  - Identity Protection policy analysis
+  - Risky user and sign-in analytics
+  - Password health metrics
+  - Authentication method distribution
+
+### Future Considerations
+
+- Hybrid identity synchronization health monitoring
+- Cross-cloud security posture (AWS/GCP integration)
+- Automated remediation recommendations
+- Microsoft Secure Score integration
+- Custom compliance framework mapping
+- Maester test framework integration
+
+**Timeline**: Development priorities are determined by community feedback and organizational needs. Contributions are welcome! See the [Contributing](#-contributing) section for guidelines.
+
 ## 🤝 Contributing
 
 We welcome contributions! Please follow these guidelines:
@@ -502,12 +500,20 @@ When adding a new security or identity report:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+## 👤 Author & 🤝 Contributors
 
-**Sebastian Flæng Markdanner**
+**Sebastian Flæng Markdanner** - *Module Author*
 - 🌐 Website: [https://chanceofsecurity.com](https://chanceofsecurity.com)
 - 🐙 GitHub: [@Noble-Effeciency13](https://github.com/Noble-Effeciency13)
-- 💼 LinkedIn: [Sebastian Markdanner](https://linkedin.com/in/sebastianmarkdanner)
+- 💼 LinkedIn: [Sebastian Markdanner](https://www.linkedin.com/in/sebastian-markdanner/)
+
+### Contributors
+
+**Christian Frohn** - *Access Package Documentor Co-Author*
+- Collaborative development of the Access Package Documentor feature
+- 🌐 Website: [https://www.christianfrohn.dk/](https://www.christianfrohn.dk/)
+- 🐙 GitHub: [@ChrFrohn](https://github.com/ChrFrohn)
+- 💼 LinkedIn: [Christian Frohn](https://www.linkedin.com/in/frohn/)
 
 ## 🙏 Acknowledgments
 
@@ -531,11 +537,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes, updates, and version information.
 
-### Latest Version: 1.0.0 (2025-10-21)
-- Initial release with Authentication Context inventory capabilities
-- Full Microsoft 365 service coverage
-- Rich HTML reporting with theme support
-- See [full changelog](CHANGELOG.md#100---2025-10-21) for complete details
+### Latest Version: 1.1.0 (2026-03-12)
+- **New Feature**: Access Package Documentor with interactive graph visualization
+- Interactive Cytoscape.js graph for access package relationships
+- Comprehensive export capabilities (PNG, Markdown, JSON)
+- Enhanced HTML reports with light/dark theme toggle
+- Developed in collaboration with Christian Frohn
+- See [full changelog](CHANGELOG.md#110---2026-03-12) for complete details
 
 ---
 

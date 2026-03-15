@@ -44,7 +44,7 @@ function Get-GroupPIMPoliciesForManagedGroups {
 				$assignmentResponse = Invoke-MgGraphRequest -Uri $assignmentUri -Method GET -ErrorAction Stop
 				if ($assignmentResponse.value) { foreach ($assignment in $assignmentResponse.value) { if ($assignment.policyId -and $assignment.roleDefinitionId) { $assignmentMap[$assignment.policyId] = $assignment.roleDefinitionId } } }
 			}
-			catch {}
+			catch { Write-Verbose "Failed to retrieve PIM assignments for group ${gid}: $($_)" }
 			$policyUri = "https://graph.microsoft.com/v1.0/policies/roleManagementPolicies?`$filter=scopeId%20eq%20'$gid'%20and%20scopeType%20eq%20'Group'&`$expand=rules"
 			$policyResponse = Invoke-MgGraphRequest -Uri $policyUri -Method GET -ErrorAction Stop
 			if ($policyResponse.value) {
@@ -55,7 +55,7 @@ function Get-GroupPIMPoliciesForManagedGroups {
 				}
 			}
 		}
-		catch { }
+		catch { Write-Verbose "Failed to retrieve PIM policies for group ${gid}: $($_)" }
 	}
 	if (-not $NoProgress) { Write-Progress -Id 66 -Activity 'PIM Policies (Managed Groups)' -Completed -Status ('Processed {0}' -f $GroupIds.Count) }
 	if (-not $policies) { return @() }
