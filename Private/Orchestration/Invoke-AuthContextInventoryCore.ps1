@@ -713,7 +713,7 @@ Please install PowerShell 7+ from: https://github.com/PowerShell/PowerShell/rele
 	}
 	catch { if (-not $Quiet) { Write-Host '   ✗ Report data preparation failed' -ForegroundColor Red } }
 
-	$htmlPath = if ($HtmlReportPath) { $HtmlReportPath } else { Join-Path $OutputPath ("AuthContext_Inventory_${Global:AuthContextTimestamp}.html") }
+	$htmlPath = if ($HtmlReportPath) { $HtmlReportPath } else { Join-Path $OutputPath ("AuthContext_Inventory_${script:AuthContextTimestamp}.html") }
 	try {
 		$caHtml = if ($script:caPoliciesExport) { $script:caPoliciesExport } else { $caPolicies }
 		# Prefer projected export (already normalized). If absent, derive minimal projection from raw policies retaining context tokens.
