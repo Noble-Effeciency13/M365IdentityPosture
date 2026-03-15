@@ -17,9 +17,11 @@ function Invoke-AccessPackageDocumentor {
 	.PARAMETER Theme
 		Preferred theme: Auto (default), Light, Dark.
 
-	.PARAMETER BetaMode
-		Control beta Graph calls (custom extension stage settings, certain preview resource types).
-		Accepted: On (default), Off.
+	.PARAMETER TenantId
+		The tenant ID of the Entra ID tenant used for authentication. Required when using a custom app registration.
+
+	.PARAMETER ClientId
+		The application (client) ID for the Microsoft Graph API authentication. Required when using a custom app registration.
 
 	.PARAMETER Quiet
 		Suppress non-essential console output.
@@ -35,7 +37,7 @@ function Invoke-AccessPackageDocumentor {
 	#>
 	[CmdletBinding()] param(
 		[Parameter()][ValidateScript({ if (!(Test-Path $_)) { New-Item -ItemType Directory -Force -Path $_ | Out-Null }; $true })][string]$OutputPath = 'C:\Reports\M365AccessPackages\',
-		[Parameter()][ValidatePattern('\\.html?$')][string]$HtmlReportPath,
+		[Parameter()][ValidatePattern('\.html?$')][string]$HtmlReportPath,
 		[Parameter()][ValidateSet('Auto','Light','Dark')][string]$Theme = 'Auto',
 		[string]$TenantId,
 		[string]$ClientId,
