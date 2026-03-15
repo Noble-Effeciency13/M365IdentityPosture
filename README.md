@@ -11,8 +11,8 @@ A comprehensive PowerShell module for security posture assessment and identity g
 
 - [Overview](#-overview)
 - [What's Included](#-whats-included)
-- [Installation](#-installation)
 - [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
 - [Reports](#-reports)
   - [Authentication Context Inventory](#-authentication-context-inventory)
   - [Access Package Documentor](#-access-package-documentor)
