@@ -3,8 +3,8 @@
 A comprehensive PowerShell module for security posture assessment and identity governance reporting across Microsoft 365, Azure, and hybrid environments.
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.0%2B-blue.svg)
-![PSGallery Version](https://img.shields.io/powershellgallery/v/M365IdentityPosture?label=PSGallery%20Version)
-![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/M365IdentityPosture?label=PSGallery%20Downloads&color=orange)
+[![PSGallery Version](https://img.shields.io/powershellgallery/v/M365IdentityPosture)](https://www.powershellgallery.com/packages/M365IdentityPosture/1.1.0)
+[![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/M365IdentityPosture)](https://www.powershellgallery.com/packages/M365IdentityPosture/1.1.0)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 📑 Table of Contents
